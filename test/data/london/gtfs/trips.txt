@@ -1,0 +1,2 @@
+route_id,service_id,trip_id,trip_headsign,block_id,shape_id,wheelchair_accessible,trip_direction_name,vehicle_journey_code
+57719,0,VJ561b7b9a32d7bbcbe347fc080303e4fef43f8f40,"Bradford City Centre",,,0,"",39
