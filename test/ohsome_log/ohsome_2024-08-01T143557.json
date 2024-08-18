@@ -1,0 +1,11 @@
+{
+    "timestamp": "2024-08-01T14:35:57.380060",
+    "status": 440,
+    "message": "Keyboard Interrupt: Query was interrupted by the user.",
+    "requestUrl": "https://api.ohsome.org/v1/elements/geometry",
+    "parameters": {
+        "time": "2021-01-01",
+        "filter": "amenity=*",
+        "properties": "tags"
+    }
+}

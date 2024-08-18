@@ -1,0 +1,11 @@
+{
+    "timestamp": "2024-08-18T13:14:42.656952",
+    "status": null,
+    "message": "Connection Error: Query could not be sent. Make sure there are no network problems and that the ohsome API URL https://api.ohsome.org/v1/elements/geometry is valid.",
+    "requestUrl": "https://api.ohsome.org/v1/elements/geometry",
+    "parameters": {
+        "time": "2021-01-01",
+        "filter": "highway=*",
+        "properties": "tags"
+    }
+}

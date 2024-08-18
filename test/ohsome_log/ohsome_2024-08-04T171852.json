@@ -1,0 +1,10 @@
+{
+    "timestamp": "2024-08-04T17:18:52.905684",
+    "status": 404,
+    "message": "The provided boundary parameter does not lie completely within the underlying data-extract polygon.",
+    "requestUrl": "https://api.ohsome.org/v1/elements/count",
+    "parameters": {
+        "time": "2021-01-01",
+        "filter": "amenity=*"
+    }
+}
