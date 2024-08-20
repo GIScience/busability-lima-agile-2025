@@ -85,7 +85,7 @@ def get_poi_inside_isochrone(pois_gdf, isochrone_gdf):
     return len(gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", op="within"))
 
 
-def create_network_from_gtfs(city, base_path=None):
+def create_network_from_gtfs(city, start_time, end_time, base_path=None):
     """
     Load GTFS data for the specified city.
 
@@ -110,9 +110,14 @@ def create_network_from_gtfs(city, base_path=None):
     stop_times = pd.read_csv(os.path.join(path, 'stop_times.txt'))
     transfers = pd.read_csv(os.path.join(path, 'transfers.txt'))
 
-    return create_gtfs_graph(stops, stop_times, transfers)
+    return create_gtfs_graph(stops, stop_times, transfers, start_time, end_time)
 
-def create_gtfs_graph(stops, stop_times, transfers):
+def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
+    # Convert start_time and end_time to datetime.time objects
+    start_time = pd.to_datetime(start_time, format='%H:%M:%S').time()
+    end_time = pd.to_datetime(end_time, format='%H:%M:%S').time()
+
+    # Convert arrival and departure times in stop_times to datetime.time objects
     stop_times['arrival_time'] = pd.to_datetime(stop_times['arrival_time'], format='%H:%M:%S').dt.time
     stop_times['departure_time'] = pd.to_datetime(stop_times['departure_time'], format='%H:%M:%S').dt.time
 
@@ -125,23 +130,27 @@ def create_gtfs_graph(stops, stop_times, transfers):
 
     # Add edges based on stop_times with time-dependent weights
     for _, stop_time in stop_times.iterrows():
-        # Find the next stop in the trip sequence
-        next_stop_time = stop_times[(stop_times['trip_id'] == stop_time['trip_id']) &
-                                    (stop_times['stop_sequence'] == stop_time['stop_sequence'] + 1)]
+        # Check if the departure time is within the specified time range
+        if start_time <= stop_time['departure_time'] <= end_time:
+            # Find the next stop in the trip sequence
+            next_stop_time = stop_times[(stop_times['trip_id'] == stop_time['trip_id']) &
+                                        (stop_times['stop_sequence'] == stop_time['stop_sequence'] + 1)]
 
-        if not next_stop_time.empty:
-            next_stop_time = next_stop_time.iloc[0]
+            if not next_stop_time.empty:
+                next_stop_time = next_stop_time.iloc[0]
 
-            # Calculate travel time in minutes
-            stop_time["arrival_time"] = datetime.combine(datetime.today(), next_stop_time['arrival_time'])
-            stop_time['departure_time'] = datetime.combine(datetime.today(), stop_time['departure_time'])
-            travel_time =  stop_time['arrival_time'] - stop_time['departure_time']
-            travel_time_minutes = travel_time.total_seconds() / 60
+                # Calculate travel time in minutes
+                stop_time["arrival_time"] = datetime.combine(datetime.today(), next_stop_time['arrival_time'])
+                stop_time['departure_time'] = datetime.combine(datetime.today(), stop_time['departure_time'])
+                travel_time = stop_time['arrival_time'] - stop_time['departure_time']
+                travel_time_minutes = travel_time.total_seconds() / 60
 
-            G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'],
-                       weight=travel_time_minutes,
-                       departure_time=stop_time['departure_time'],
-                       arrival_time=datetime.combine(datetime.today(), next_stop_time['departure_time']))
+                # Add edge if the arrival time is within the specified time range
+                if start_time <= next_stop_time['arrival_time'] <= end_time:
+                    G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'],
+                               weight=travel_time_minutes,
+                               departure_time=stop_time['departure_time'],
+                               arrival_time=stop_time['arrival_time'])
 
     # Add transfer edges from the transfers.txt file
     for _, transfer in transfers.iterrows():
@@ -151,7 +160,9 @@ def create_gtfs_graph(stops, stop_times, transfers):
 
         # Add the transfer edge with the minimum transfer time as the weight
         G.add_edge(from_stop_id, to_stop_id, weight=min_transfer_time, is_transfer=True)
+
     return G
+
 
 def peartree_graph(base_path=None):
     if base_path is None:

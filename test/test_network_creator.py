@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import networkx as nx
 from shapely import Point
 
@@ -64,8 +66,8 @@ def test_get_poi_inside_isochrone(pois_gdf, bus_isochrones_gdf):
     assert pois > 0
 
 
-def test_create_network_from_gtfs():
-    graph = create_network_from_gtfs("london", base_path=".")
+def test_create_network_from_gtfs(start_time):
+    graph = create_network_from_gtfs("london", base_path=".", start_time=start_time, end_time=start_time + timedelta(minutes=30))
     assert graph is not None
     assert len(graph.nodes) > 0
     assert len(graph.edges) > 0
