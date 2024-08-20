@@ -140,17 +140,24 @@ def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
                 next_stop_time = next_stop_time.iloc[0]
 
                 # Calculate travel time in minutes
-                stop_time["arrival_time"] = datetime.combine(datetime.today(), next_stop_time['arrival_time'])
-                stop_time['departure_time'] = datetime.combine(datetime.today(), stop_time['departure_time'])
-                travel_time = stop_time['arrival_time'] - stop_time['departure_time']
+                departure_time_full = datetime.combine(datetime.today(), stop_time['departure_time'])
+                arrival_time_full = datetime.combine(datetime.today(), next_stop_time['arrival_time'])
+                travel_time = arrival_time_full - departure_time_full
                 travel_time_minutes = travel_time.total_seconds() / 60
 
-                # Add edge if the arrival time is within the specified time range
-                if start_time <= next_stop_time['arrival_time'] <= end_time:
-                    G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'],
-                               weight=travel_time_minutes,
-                               departure_time=stop_time['departure_time'],
-                               arrival_time=stop_time['arrival_time'])
+                # Create an edge with a list of times if it doesn't exist yet
+                if G.has_edge(stop_time['stop_id'], next_stop_time['stop_id']):
+                    G[stop_time['stop_id']][next_stop_time['stop_id']]['times'].append({
+                        'departure_time': stop_time['departure_time'],
+                        'arrival_time': next_stop_time['arrival_time'],
+                        'travel_time_minutes': travel_time_minutes
+                    })
+                else:
+                    G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'], times=[{
+                        'departure_time': stop_time['departure_time'],
+                        'arrival_time': next_stop_time['arrival_time'],
+                        'travel_time_minutes': travel_time_minutes
+                    }])
 
     # Add transfer edges from the transfers.txt file
     for _, transfer in transfers.iterrows():
@@ -162,6 +169,7 @@ def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
         G.add_edge(from_stop_id, to_stop_id, weight=min_transfer_time, is_transfer=True)
 
     return G
+
 
 
 def peartree_graph(base_path=None):

@@ -75,3 +75,7 @@ def test_create_network_from_gtfs(start_time):
     shortest_path = nx.shortest_path(graph, source=4, target=9)
     assert shortest_path is not None
     assert isinstance(shortest_path, list)
+    edge_data = graph.edges(data=True)
+    assert edge_data is not None
+    assert isinstance(edge_data._adjdict, dict)
+    assert len(edge_data._adjdict) > 0
