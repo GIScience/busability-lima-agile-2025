@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, time
 
 import networkx as nx
 import pytest
@@ -53,6 +54,10 @@ def point2():
     return Point(0, 100)
 
 @pytest.fixture
+def start_time():
+    return datetime.combine(datetime.today(), time(8, 0))
+
+@pytest.fixture
 def gdf():
     gdf = gpd.GeoDataFrame(geometry=[Point(0, 0), Point(0, 1), Point(0, 2)])
     gdf['APROXIMACION'] = ['A', 'B', 'C']
@@ -91,6 +96,7 @@ def bus_network():
 
     nodes_with_attributes = [
         (4, {'name': 'Node D', 'point': Point(0, 0)}),
+        (5, {'name': 'Node X', 'point': Point(0, 0)}),
         (6, {'name': 'Node F', 'point': Point(1, 1)}),
         (7, {'name': 'Node G', 'point': Point(2, 2)}),
         (8, {'name': 'Node H', 'point': Point(3, 3)}),
@@ -126,7 +132,8 @@ def walk_from_bus_stop():
         (6, {'name': 'Node F', 'point': Point(1, 1), 'poi': 7}),
         (15, {'name': 'Node M', 'point': Point(1, 2), 'poi': 8}),
         (16, {'name': 'Node N', 'point': Point(3, 1), 'poi': 9}),
-        (9, {'name': 'Node J', 'point': Point(3,8), 'poi': 9})
+        (9, {'name': 'Node J', 'point': Point(3,8), 'poi': 9}),
+        (5, {'name': 'Node X', 'point': Point(3,8), 'poi': 9}),
 
     ]
 

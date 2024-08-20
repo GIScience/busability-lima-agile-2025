@@ -121,7 +121,7 @@ def create_gtfs_graph(stops, stop_times, transfers):
 
     # Add nodes
     for _, stop in stops.iterrows():
-        G.add_node(str(stop['stop_id']), name=stop['stop_name'], lat=stop['stop_lat'], lon=stop['stop_lon'])
+        G.add_node(stop['stop_id'], name=stop['stop_name'], lat=stop['stop_lat'], lon=stop['stop_lon'])
 
     # Add edges based on stop_times with time-dependent weights
     for _, stop_time in stop_times.iterrows():
@@ -133,14 +133,15 @@ def create_gtfs_graph(stops, stop_times, transfers):
             next_stop_time = next_stop_time.iloc[0]
 
             # Calculate travel time in minutes
-            travel_time = datetime.combine(datetime.today(), next_stop_time['arrival_time']) - \
-                          datetime.combine(datetime.today(), stop_time['departure_time'])
+            stop_time["arrival_time"] = datetime.combine(datetime.today(), next_stop_time['arrival_time'])
+            stop_time['departure_time'] = datetime.combine(datetime.today(), stop_time['departure_time'])
+            travel_time =  stop_time['arrival_time'] - stop_time['departure_time']
             travel_time_minutes = travel_time.total_seconds() / 60
 
             G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'],
                        weight=travel_time_minutes,
                        departure_time=stop_time['departure_time'],
-                       arrival_time=next_stop_time['arrival_time'])
+                       arrival_time=datetime.combine(datetime.today(), next_stop_time['departure_time']))
 
     # Add transfer edges from the transfers.txt file
     for _, transfer in transfers.iterrows():

@@ -1,9 +1,11 @@
 city_name: London
-bus_gdf_path: ../data/test_stops_lima.geojson
-pois_gdf_path: ../test/data/pois_test.gpkg
-iso_polygons_gdf_path: ../data/isochrones_test.gpkg
-drive_iso_gdf_path: ../test/data/drive_isos_test.gpkg
+bus_gdf_path: data/test_stops_lima.geojson
+pois_gdf_path: test/data/pois_test.gpkg
+iso_polygons_gdf_path: data/isochrones_test.gpkg
+drive_iso_gdf_path: test/data/drive_isos_test.gpkg
 crs: 32718
 matching_column: NUEVO_CODIGO
-busability_isochrones_output_path: ../results/
-hexagon_gdf_path: ../data/hexagons_7.geojson
+busability_isochrones_output_path: results/
+hexagon_gdf_path: data/hexagons_7.geojson
+date: 8:00:00
+minute_threshold: 30
