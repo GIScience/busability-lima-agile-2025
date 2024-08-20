@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import geopandas as gpd
 import networkx as nx
 import pandas as pd
@@ -18,10 +20,17 @@ pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
 iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
 drive_iso_gdf = drive_iso_gdf.to_crs(get_config_value("crs"))
 
+date_string = get_config_value("date")
+
 
 nodes, edges = gdf_to_nodes_and_weighted_edges(bus_gdf, iso_polygons_gdf, get_config_value("matching_column"))
 
 walk_nodes, walk_edges = create_walk_edges(bus_gdf, iso_polygons_gdf, get_config_value("matching_column"))
+
+date_object = datetime.strptime(date_string, "%H:%M:%S").time()
+
+minute_threshold = get_config_value("minute_threshold")
+
 
 G = nx.Graph()
 
@@ -46,7 +55,7 @@ result_gdf_list = []
 
 for start_node in G3.nodes:
 
-    all_reachable_nodes = get_multimodal_poi_directness(G, G2, G3, start_node, target_nodes, weight_threshold=15)
+    all_reachable_nodes = get_multimodal_poi_directness(G, G2, G3, start_node, target_nodes, start_time=minute_threshold, weight_threshold=date_object)
 
     union_gdf = get_union_reachable_polygons(iso_polygons_gdf, matching_column=get_config_value("matching_column"), polygon_names=all_reachable_nodes, crs=32718)
 
