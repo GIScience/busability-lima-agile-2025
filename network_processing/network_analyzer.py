@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import networkx as nx
 
@@ -24,24 +24,38 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
         try:
             for neighbor in graph[node]:
                 edge_data = graph.get_edge_data(node, neighbor)
+
                 if "is_transfer" in edge_data.keys():
+                    # Handle transfer edges
                     reachable.update(dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"]))))
-                elif edge_data["arrival_time"] <= end_time:
-                    reachable.update(dfs(neighbor, edge_data["arrival_time"]))
+                else:
+                    # Handle time-dependent edges
+                    times = edge_data['times']
+                    next_time_info = None
+
+                    # Find the next valid departure time after the current time
+                    for time_info in times:
+                        if time_info['departure_time'] >= current_time:
+                            next_time_info = time_info
+                            break
+
+                    # If a valid next time was found, and it's within the allowed time window
+                    if next_time_info and next_time_info['arrival_time'] <= end_time:
+                        reachable.update(dfs(neighbor, next_time_info['arrival_time']))
         except Exception as err:
             raise err
-
 
         return reachable
 
     return dfs(start_node, start_time)
 
 
-
 def reachable_nodes_to_pois(bus_graph, nodes_dict, end_time):
     '''Get all reachable nodes from the bus network to the POIs within the remaining weight.'''
     all_nodes = set()
     for node, current_time in nodes_dict.items():
+        if node not in bus_graph:
+            continue
         remaining_time = (end_time - current_time).total_seconds() / 60
         paths = nx.single_source_dijkstra(bus_graph, node, weight='weight', cutoff=remaining_time)
         all_nodes.update(paths[0].keys())

@@ -148,14 +148,14 @@ def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
                 # Create an edge with a list of times if it doesn't exist yet
                 if G.has_edge(stop_time['stop_id'], next_stop_time['stop_id']):
                     G[stop_time['stop_id']][next_stop_time['stop_id']]['times'].append({
-                        'departure_time': stop_time['departure_time'],
-                        'arrival_time': next_stop_time['arrival_time'],
+                        'departure_time': departure_time_full,
+                        'arrival_time': arrival_time_full,
                         'travel_time_minutes': travel_time_minutes
                     })
                 else:
                     G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'], times=[{
-                        'departure_time': stop_time['departure_time'],
-                        'arrival_time': next_stop_time['arrival_time'],
+                        'departure_time': departure_time_full,
+                        'arrival_time': arrival_time_full,
                         'travel_time_minutes': travel_time_minutes
                     }])
 
