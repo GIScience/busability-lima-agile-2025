@@ -5,7 +5,7 @@ from shapely import Point
 
 from busability.network_preprocessing.network_creator import calculate_distance, gdf_to_nodes_and_weighted_edges, \
     create_walk_edges, get_union_reachable_polygons, get_drive_isochrone, get_poi_inside_isochrone, \
-    create_network_from_gtfs, peartree_graph, gtfs2nx_graph
+    create_network_from_gtfs, get_graphs, save_graph_to_file
 
 
 def test_calculate_distance(point1, point2):
@@ -15,34 +15,6 @@ def test_calculate_distance(point1, point2):
 def test_calculate_distance(point1):
     assert calculate_distance(point1, point1) == 0
 
-
-def test_gdf_to_nodes_and_weighted_edges(bus_stop_gdf, bus_isochrones_gdf):
-    nodes, edges = gdf_to_nodes_and_weighted_edges(bus_stop_gdf, bus_isochrones_gdf, 'NUEVO_CODIGO')
-
-    assert len(nodes) == 2
-    assert len(edges) == 1
-    for node in nodes:
-        assert 'name' in node[1]
-        assert 'point' in node[1]
-        assert 'poi' in node[1]
-        assert isinstance(node[1]['poi'], float)
-        assert isinstance(node[1]['point'], Point)
-    assert isinstance(edges[0][2], float)
-    assert edges[0][1] == nodes[1][0]
-    assert edges[0][0] == nodes[0][0]
-
-
-def test_gdf_to_nodes_and_weighted_edges(bus_stop_gdf, bus_isochrones_gdf):
-    nodes, edges = create_walk_edges(bus_stop_gdf, bus_isochrones_gdf, 'NUEVO_CODIGO')
-    assert len(nodes) == 2
-    assert len(edges) == 2
-    for node in nodes:
-        assert 'name' in node[1]
-    for edge in edges:
-        assert isinstance(edge[2], float)
-        assert edge[0] not in [nodes[0][0], nodes[1][0]]
-        assert edge[1] in [nodes[0][0], nodes[1][0]]
-        assert edge[0] != edge[1]
 
 def test_get_union_reachable_polygons(bus_isochrones_gdf):
     reachable_stops = ['CALLE 25', 'CALLE 37']
@@ -79,3 +51,33 @@ def test_create_network_from_gtfs(start_time):
     assert edge_data is not None
     assert isinstance(edge_data._adjdict, dict)
     assert len(edge_data._adjdict) > 0
+
+
+def test_get_graphs(start_time, bus_isochrones_gdf):
+    matching_column = "stop_id"
+    end_time = start_time + timedelta(minutes=30)
+    bus_graph, walk_graph = get_graphs("london", start_time, end_time, bus_isochrones_gdf, matching_column, path_to_gtfs=".")
+    assert bus_graph is not None
+    assert walk_graph is not None
+    assert len(bus_graph.nodes) < len(walk_graph.nodes)
+    assert len(bus_graph.edges) < len(walk_graph.edges)
+
+
+def test_save_graph_to_file():
+
+    # Create a graph
+    G = nx.Graph()
+
+    # Add nodes with list attributes
+    G.add_node(1, times=[1, 2, 3])
+    G.add_node(2, attribute=['a', 'b', 'c'])
+    G.add_edge(1, 2)
+
+    path = "data/test_graph_with_lists.gml"
+
+    save_graph_to_file(G, path)
+
+    G_loaded = nx.read_gml("graph_with_lists.gml")
+
+    assert G.nodes == G_loaded.nodes
+    assert G.edges == G_loaded.edges

@@ -74,8 +74,6 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
     # Step 2: Find the nearest node in the target nodes
     for node, path_length in shortest_paths.items():
 
-
-
         if path_length > weight_threshold:
             continue
 
