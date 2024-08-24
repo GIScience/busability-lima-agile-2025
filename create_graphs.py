@@ -33,5 +33,5 @@ bus_graph, walk_graph = get_graphs(city, start_time_object, end_time_object, iso
 
 output_path = get_config_value("output_path")
 
-save_graph_to_file(bus_graph, output_path + city + "_bus_graph.graphml")
-save_graph_to_file(walk_graph, output_path + city + "_walk_graph.graphml")
+save_graph_to_file(bus_graph, output_path + city + "_bus_graph.gml")
+save_graph_to_file(walk_graph, output_path + city + "_walk_graph.gml")
