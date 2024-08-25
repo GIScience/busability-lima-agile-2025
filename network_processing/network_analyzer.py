@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
 import networkx as nx
+import geopandas as gpd
 
 
 def shortest_paths_to_nodes(graph, start, nodes):
@@ -30,11 +31,18 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                     reachable.update(dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"]))))
                 else:
                     # Handle time-dependent edges
-                    times = edge_data['times']
+                    for time_entry in edge_data['times']:
+                        if isinstance(time_entry['arrival_time'], str):
+                            time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'],
+                                                                      '%Y-%m-%d %H:%M:%S')
+                        if isinstance(time_entry['departure_time'] , str):
+                            time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'],
+                                                                         '%Y-%m-%d %H:%M:%S')
+
                     next_time_info = None
 
                     # Find the next valid departure time after the current time
-                    for time_info in times:
+                    for time_info in edge_data['times']:
                         if time_info['departure_time'] >= current_time:
                             next_time_info = time_info
                             break
@@ -42,6 +50,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                     # If a valid next time was found, and it's within the allowed time window
                     if next_time_info and next_time_info['arrival_time'] <= end_time:
                         reachable.update(dfs(neighbor, next_time_info['arrival_time']))
+
         except Exception as err:
             raise err
 
@@ -69,7 +78,7 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
 
     if not shortest_paths:
         print("No path found to any node in the list from the start node.")
-        return 0
+        return []
     end_time = start_time + timedelta(minutes=weight_threshold)
     # Step 2: Find the nearest node in the target nodes
     for node, path_length in shortest_paths.items():
@@ -92,3 +101,28 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
         # poi_count = sum(node_attributes.get(node, 0) for node in all_reachable_nodes)
 
     return reachable_nodes
+
+
+def get_nodes_of_intersected_isochrones(isochrones_gdf, hexagon_gdf, matching_column):
+    ''' Get the nodes of the intersected isochrones'''
+    intersections = gpd.sjoin(isochrones_gdf, hexagon_gdf, how='inner', op='intersects')
+
+    node_names = set(intersections[matching_column])
+
+    return node_names
+
+
+def get_centroids(gdf):
+    ''' Get the centroids of the GeoDataFrame'''
+    centroids = gdf.geometry.centroid
+
+    centroid_gdf = gpd.GeoDataFrame(gdf.drop(columns='geometry'), geometry=centroids, crs=gdf.crs)
+
+    return centroid_gdf
+
+
+def get_intersected_isochrones(isochrones_gdf, hexagon_centroid_gdf):
+    ''' Get the intersected isochrones'''
+    intersections = gpd.sjoin(isochrones_gdf, hexagon_centroid_gdf, how='inner', op='intersects')
+
+    return intersections

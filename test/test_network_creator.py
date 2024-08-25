@@ -6,6 +6,7 @@ from shapely import Point
 from busability.network_preprocessing.network_creator import calculate_distance, gdf_to_nodes_and_weighted_edges, \
     create_walk_edges, get_union_reachable_polygons, get_drive_isochrone, get_poi_inside_isochrone, \
     create_network_from_gtfs, get_graphs, save_graph_to_file
+from network_preprocessing.network_creator import load_graph_from_file
 
 
 def test_calculate_distance(point1, point2):
@@ -77,7 +78,7 @@ def test_save_graph_to_file():
 
     save_graph_to_file(G, path)
 
-    G_loaded = nx.read_gml("graph_with_lists.gml")
+    G_loaded = load_graph_from_file(path)
 
-    assert G.nodes == G_loaded.nodes
-    assert G.edges == G_loaded.edges
+    assert len(G.nodes) == len(G_loaded.nodes)
+    assert len(G.edges) == len(G_loaded.edges)

@@ -1,7 +1,7 @@
 from datetime import datetime, time, timedelta
 
 from network_processing.network_analyzer import get_multimodal_poi_directness, shortest_paths_to_nodes, \
-    reachable_nodes_via_bus_network, reachable_nodes_to_pois
+    reachable_nodes_via_bus_network, reachable_nodes_to_pois, get_nodes_of_intersected_isochrones, get_centroids
 from busability.network_preprocessing.network_creator import create_network_from_gtfs
 
 
@@ -21,3 +21,15 @@ def test_gtfs_network_analysis(walk_to_busstop_network, walk_from_bus_stop, star
     result = get_multimodal_poi_directness(walk_to_busstop_network, bus_network, walk_from_bus_stop, start_node,
                                            target_nodes, weight_threshold=weight_threshold, start_time=start_time)
     assert result == {4, 5, 6, 7, 10, 12, 13, 15, 16}
+
+
+def test_get_nodes_of_intersected_isochrones(bus_isochrones_gdf, hexagons_gdf):
+    matching_column = "NUEVO_CODIGO"
+    result = get_nodes_of_intersected_isochrones(bus_isochrones_gdf, hexagons_gdf, matching_column)
+    assert result == {2072.0, 2074.0}
+
+
+def test_get_centroids(hexagons_gdf):
+    result = get_centroids(hexagons_gdf)
+    assert set(hexagons_gdf.columns) == set(result.columns)
+    assert all(result.geom_type == 'Point')

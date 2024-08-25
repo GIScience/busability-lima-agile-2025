@@ -60,6 +60,7 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
 
         # Add the edge between the existing node and the new node
         walk_graph.add_edge(name, new_node_name, weight=value)
+        walk_graph.add_edge(new_node_name, name, weight=value)
 
     # Return the new graph
     return walk_graph
@@ -221,3 +222,5 @@ def get_graphs(city, start_time_object, end_time_object, iso_polygons_gdf, match
     return bus_graph, walk_graph
 
 
+def load_graph_from_file(filename):
+    return nx.read_gml(filename)
