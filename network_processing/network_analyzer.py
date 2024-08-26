@@ -24,28 +24,33 @@ def reachable_nodes_via_bus_network(bus_graph, node, remaining_weight, current_t
 
 
 def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time, end_time, mode="normal"):
+    visited = set()
+    reachable = {}
+
     def dfs(node, current_time, trip_id=None):
         if current_time > end_time:
-            return set()
+            return
 
-        reachable = {node: current_time}
+        # Mark the current node as reachable at the current time
+        reachable[node] = current_time
+        visited.add(node)
+
         if mode == "normal":
             try:
                 for neighbor in graph[node]:
                     edge_data = graph.get_edge_data(node, neighbor)
 
                     if "is_transfer" in edge_data.keys():
-                        # Handle transfer edges
-                        reachable.update(dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"]))))
+                        # Handle transfer edges, only proceed if neighbor hasn't been visited in the current path
+                        if neighbor not in visited:
+                            dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"])))
                     else:
                         # Handle time-dependent edges
                         for time_entry in edge_data['times']:
                             if isinstance(time_entry['arrival_time'], str):
-                                time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'],
-                                                                          '%Y-%m-%d %H:%M:%S')
-                            if isinstance(time_entry['departure_time'] , str):
-                                time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'],
-                                                                             '%Y-%m-%d %H:%M:%S')
+                                time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'], '%Y-%m-%d %H:%M:%S')
+                            if isinstance(time_entry['departure_time'], str):
+                                time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'], '%Y-%m-%d %H:%M:%S')
 
                         next_time_info = None
 
@@ -53,31 +58,28 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                         for time_info in edge_data['times']:
                             if time_info['departure_time'] >= current_time:
                                 next_time_info = time_info
-                                break
-
-                        # If a valid next time was found, and it's within the allowed time window
-                        if next_time_info and next_time_info['arrival_time'] <= end_time:
-                            reachable.update(dfs(neighbor, next_time_info['arrival_time']))
+                                if next_time_info['arrival_time'] <= end_time:
+                                    dfs(neighbor, next_time_info['arrival_time'])
 
             except Exception as err:
                 raise err
+
         elif mode == "rush_hour":
             try:
                 for neighbor in graph[node]:
                     edge_data = graph.get_edge_data(node, neighbor)
 
                     if "is_transfer" in edge_data.keys():
-                        # Handle transfer edges
-                        reachable.update(dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"]))))
+                        # Handle transfer edges, only proceed if neighbor hasn't been visited in the current path
+                        if neighbor not in visited:
+                            dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"])))
                     else:
                         # Handle time-dependent edges
                         for time_entry in edge_data['times']:
                             if isinstance(time_entry['arrival_time'], str):
-                                time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'],
-                                                                          '%Y-%m-%d %H:%M:%S')
-                            if isinstance(time_entry['departure_time'] , str):
-                                time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'],
-                                                                             '%Y-%m-%d %H:%M:%S')
+                                time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'], '%Y-%m-%d %H:%M:%S')
+                            if isinstance(time_entry['departure_time'], str):
+                                time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'], '%Y-%m-%d %H:%M:%S')
 
                         next_time_info = None
                         next_trip_id = None
@@ -104,16 +106,19 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                         # If a valid next time was found, and it's within the allowed time window
                         if next_time_info and next_time_info['arrival_time'] <= end_time:
-                            reachable.update(dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id))
+                            dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id)
 
             except Exception as err:
                 raise err
+
         else:
             raise ValueError("Invalid mode. Please choose either 'normal' or 'rush_hour' mode.")
 
-        return reachable
+    # Start the DFS with the visited and reachable sets as shared variables
+    dfs(start_node, start_time)
+    return reachable
 
-    return dfs(start_node, start_time)
+
 
 
 def reachable_nodes_to_pois(bus_graph, nodes_dict, end_time):
@@ -144,7 +149,7 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
     remaining_time = weight_threshold - path_length
 
     reachable_nodes_dict = reachable_nodes_via_bus_network(bus_stop_graph, bus_node, remaining_time, current_time, end_time)
-
+    reachable_nodes.update(reachable_nodes_dict.keys())
     # Step 4: Find all reachable nodes from the bus stop nodes to POIs
     all_reachable_nodes = reachable_nodes_to_pois(from_bus_stop_graph, reachable_nodes_dict, end_time)
 
