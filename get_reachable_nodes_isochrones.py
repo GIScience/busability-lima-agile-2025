@@ -53,7 +53,7 @@ for start_node in tqdm(start_nodes, total=len(start_nodes), desc="Calculating re
 
     all_reachable_nodes = get_multimodal_poi_directness(walk_graph, bus_graph, walk_graph, start_node, target_nodes, start_time=start_time_object, weight_threshold=minute_threshold)
 
-    union_gdf = get_union_reachable_polygons(iso_polygons_gdf, matching_column=get_config_value("matching_column"), polygon_names=all_reachable_nodes, crs=get_config_value("crs"))
+    union_gdf = get_union_reachable_polygons(iso_polygons_gdf, matching_column=get_config_value("matching_column"), polygon_names=all_reachable_nodes, crs=get_config_value("crs"), start_node=start_node)
 
     result_gdf_list.append(union_gdf)
 

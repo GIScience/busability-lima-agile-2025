@@ -65,7 +65,7 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
     # Return the new graph
     return walk_graph
 
-def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[str], crs: int = 32718):
+def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[str], start_node: str, crs: int = 32718):
     ''' Get the union of the polygons that are reachable from the nodes in the graph'''
 
     # union the polygons
@@ -74,6 +74,8 @@ def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[
     union_gdf = gpd.GeoDataFrame(geometry=[union])
 
     union_gdf = union_gdf.set_crs(epsg=crs)
+
+    union_gdf[matching_column] = start_node
 
     return union_gdf
 

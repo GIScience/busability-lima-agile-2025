@@ -18,12 +18,14 @@ def test_calculate_distance(point1):
 
 
 def test_get_union_reachable_polygons(bus_isochrones_gdf):
+    start_node = 'CALLE 24'
     reachable_stops = ['CALLE 25', 'CALLE 37']
-    union_gdf = get_union_reachable_polygons(bus_isochrones_gdf, 'APROXIMACION', reachable_stops, crs=32718)
+    union_gdf = get_union_reachable_polygons(bus_isochrones_gdf, 'APROXIMACION', reachable_stops, start_node, crs=32718)
     assert union_gdf is not None
     assert len(union_gdf) == 1
     assert union_gdf.iloc[0]['geometry'].geom_type == 'Polygon'
     assert union_gdf.crs == 32718
+    assert union_gdf.iloc[0]['APROXIMACION'] == 'CALLE 24'
 
 def test_get_drive_isochrone(drive_isos_gdf):
     drive_iso = get_drive_isochrone(drive_isos_gdf, 'EL PORTILLO_2.0', 'APROXIMACION')
