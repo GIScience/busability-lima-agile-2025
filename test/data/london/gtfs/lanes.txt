@@ -1,0 +1,7 @@
+start_id,end_id,len_two_lanes,len_more_than_two_lanes
+6,9,100,200
+6,7,0,300000
+7,9,150,0
+9,10,0,100
+4,6,0,50
+7,99,0,100

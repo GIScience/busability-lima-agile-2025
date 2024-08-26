@@ -30,9 +30,9 @@ minute_threshold = get_config_value("minute_threshold")
 
 end_time_object = start_time_object + timedelta(minutes=minute_threshold)
 
-walk_graph = load_graph_from_file(get_config_value("output_path") + get_config_value("city_name") + "_walk_graph.gml").to_undirected()
+walk_graph = load_graph_from_file(get_config_value("output_path") + get_config_value("city_name") + "_walk_graph.gml")
 
-bus_graph = load_graph_from_file(get_config_value("output_path") + get_config_value("city_name") + "_bus_graph.gml").to_undirected()
+bus_graph = load_graph_from_file(get_config_value("output_path") + get_config_value("city_name") + "_bus_graph.gml")
 
 logging.log(logging.INFO, "Loaded graphs from file")
 

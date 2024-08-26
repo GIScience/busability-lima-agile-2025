@@ -116,13 +116,20 @@ def create_network_from_gtfs(city, start_time, end_time, base_path=None):
         transfers = pd.DataFrame()
         logging.log(logging.INFO, "No transfers.txt file found. No transfer edges will be added to the graph.")
 
+    if os.path.exists(os.path.join(path, 'lanes.txt')):
+        lanes = pd.read_csv(os.path.join(path, 'lanes.txt'))
+    else:
+        lanes = pd.DataFrame()
+        logging.log(logging.INFO, "No lanes.txt file found. No lane attributes will be added to the graph.")
+
+
     logging.log(logging.INFO, "Loaded GTFS files. Creating graph...")
 
-    return create_gtfs_graph(stops, stop_times, transfers, start_time, end_time)
+    return create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
 
 
 
-def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
+def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time):
 
     # Convert arrival and departure times in stop_times to datetime.time objects
     def convert_to_time(value):
@@ -179,32 +186,45 @@ def create_gtfs_graph(stops, stop_times, transfers, start_time, end_time):
                 travel_time = arrival_time_full - departure_time_full
                 travel_time_minutes = travel_time.total_seconds() / 60
 
-                # Create an edge with a list of times if it doesn't exist yet
+                # Create an edge with a list of times and trip_id if it doesn't exist yet
                 if G.has_edge(stop_time['stop_id'], next_stop_time['stop_id']):
                     G[stop_time['stop_id']][next_stop_time['stop_id']]['times'].append({
                         'departure_time': departure_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'arrival_time': arrival_time_full.strftime("%Y-%m-%d %H:%M:%S"),
-                        'travel_time_minutes': travel_time_minutes
+                        'travel_time_minutes': travel_time_minutes,
+                        'trip_id': stop_time['trip_id']
                     })
                 else:
                     G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'], times=[{
                         'departure_time': departure_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'arrival_time': arrival_time_full.strftime("%Y-%m-%d %H:%M:%S"),
-                        'travel_time_minutes': travel_time_minutes
+                        'travel_time_minutes': travel_time_minutes,
+                        'trip_id': stop_time['trip_id']
                     }])
 
     # Add transfer edges from the transfers.txt file with a progress bar
     for _, transfer in tqdm(transfers.iterrows(), total=transfers.shape[0], desc="Adding transfer edges"):
         from_stop_id = transfer['from_stop_id']
         to_stop_id = transfer['to_stop_id']
-        min_transfer_time = transfer['min_transfer_time']
+        min_transfer_time = transfer['min_transfer_time'] / 60
 
         # Add the transfer edge with the minimum transfer time as the weight
         G.add_edge(from_stop_id, to_stop_id, weight=min_transfer_time, is_transfer=True)
 
+    # Add lane attributes to the edges
+    for _, lane in tqdm(lanes.iterrows(), total=lanes.shape[0], desc="Adding lane attributes"):
+        from_stop_id = lane['start_id']
+        to_stop_id = lane['end_id']
+
+        if not G.has_edge(from_stop_id, to_stop_id):
+            continue
+        G[from_stop_id][to_stop_id]['len_two_lanes'] = lane['len_two_lanes']
+        G[from_stop_id][to_stop_id]['len_more_than_two_lanes'] = lane['len_more_than_two_lanes']
+
     logging.log(logging.INFO, "GTFS graph created.")
 
     return G
+
 
 
 def save_graph_to_file(graph, filename):

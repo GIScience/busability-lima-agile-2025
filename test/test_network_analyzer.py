@@ -1,7 +1,8 @@
 from datetime import datetime, time, timedelta
 
 from network_processing.network_analyzer import get_multimodal_poi_directness, shortest_paths_to_nodes, \
-    reachable_nodes_via_bus_network, reachable_nodes_to_pois, get_nodes_of_intersected_isochrones, get_centroids
+    reachable_nodes_via_bus_network, reachable_nodes_to_pois, get_nodes_of_intersected_isochrones, get_centroids, \
+    time_dependent_reachable_nodes_via_bus_network, get_bus_station_from_isochrone
 from busability.network_preprocessing.network_creator import create_network_from_gtfs
 
 
@@ -33,3 +34,22 @@ def test_get_centroids(hexagons_gdf):
     result = get_centroids(hexagons_gdf)
     assert set(hexagons_gdf.columns) == set(result.columns)
     assert all(result.geom_type == 'Point')
+
+
+def test_time_dependent_reachable_nodes_via_bus_network_rush_hour(start_time):
+    start_node = 4
+    weight_threshold = 10
+    end_time = start_time + timedelta(minutes=weight_threshold)
+    bus_network = create_network_from_gtfs("london", base_path=".", start_time=start_time,
+                                           end_time=start_time + timedelta(minutes=weight_threshold))
+    result = time_dependent_reachable_nodes_via_bus_network(start_node, bus_network, start_time, end_time, mode="rush_hour")
+    assert result.keys() == {4, 6}
+    result_normal = time_dependent_reachable_nodes_via_bus_network(start_node, bus_network, start_time, end_time,
+                                                            mode="normal")
+    assert result.keys() != result_normal.keys()
+
+
+def test_get_bus_station_from_isochrone():
+    isochrone_node = "test_1.0"
+    result = get_bus_station_from_isochrone(isochrone_node)
+    assert result == ('test', 1)
