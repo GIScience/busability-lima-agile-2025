@@ -57,7 +57,7 @@ for start_node in tqdm(start_nodes, total=len(start_nodes), desc="Calculating re
 
     result_gdf_list.append(union_gdf)
 
-
+    # TODO: remove
     final_gdf = gpd.GeoDataFrame(pd.concat(result_gdf_list, ignore_index=True))
     final_gdf.to_file(get_config_value("output_path") + get_config_value("city_name") + "_union_polygon.geojson",
                       driver='GeoJSON')

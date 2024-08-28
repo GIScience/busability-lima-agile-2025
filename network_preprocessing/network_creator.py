@@ -84,8 +84,12 @@ def get_drive_isochrone(drive_isochrones_gdf, start_node, matching_column: str):
     return drive_isochrones_gdf[drive_isochrones_gdf[matching_column] == start_node]
 
 def get_poi_inside_isochrone(pois_gdf, isochrone_gdf):
-
-    return len(gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", op="within"))
+    if "index_right" in isochrone_gdf.columns:
+        isochrone_gdf = isochrone_gdf.drop(columns="index_right")
+    if "index_left" in isochrone_gdf.columns:
+        isochrone_gdf = isochrone_gdf.drop(columns="index_left")
+    joined_gdf = gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", op="within")
+    return len(joined_gdf)
 
 
 def create_network_from_gtfs(city, start_time, end_time, base_path=None):

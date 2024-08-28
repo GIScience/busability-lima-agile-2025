@@ -60,6 +60,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 next_time_info = time_info
                                 if next_time_info['arrival_time'] <= end_time:
                                     dfs(neighbor, next_time_info['arrival_time'])
+                                    #TODO: break?
 
             except Exception as err:
                 raise err
