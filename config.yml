@@ -13,4 +13,5 @@ minute_threshold: 30
 rush_hour_speed: 14
 bus_speed: 60
 walk_isochrones_from_hex_gdf_path: data/test_walk_iso_for_hex.geojson
+mode: normal
 

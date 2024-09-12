@@ -22,6 +22,8 @@ pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
 iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
 hexagons_centroids_gdf = hexagons_centroids_gdf.to_crs(get_config_value("crs"))
 
+mode = get_config_value("mode")
+
 start_time_string = get_config_value("date")
 
 start_time_object = datetime.combine(datetime.today(),datetime.strptime(start_time_string, "%H:%M:%S").time())
@@ -51,7 +53,7 @@ result_gdf_list = []
 #for start_node in tqdm(start_nodes, total=len(start_nodes), desc="Calculating reachable nodes"):
 for start_node in tqdm(start_nodes, total=len(start_nodes), desc="Calculating reachable nodes"):
 
-    all_reachable_nodes = get_multimodal_poi_directness(walk_graph, bus_graph, walk_graph, start_node, target_nodes, start_time=start_time_object, weight_threshold=minute_threshold)
+    all_reachable_nodes = get_multimodal_poi_directness(walk_graph, bus_graph, walk_graph, start_node, target_nodes, start_time=start_time_object, weight_threshold=minute_threshold, mode=mode)
 
     union_gdf = get_union_reachable_polygons(iso_polygons_gdf, matching_column=get_config_value("matching_column"), polygon_names=all_reachable_nodes, crs=get_config_value("crs"), start_node=start_node)
 
