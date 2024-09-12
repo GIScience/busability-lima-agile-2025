@@ -108,12 +108,63 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                         # If a valid next time was found, and it's within the allowed time window
                         if next_time_info and next_time_info['arrival_time'] <= end_time:
                             dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id)
+            except Exception as err:
+                raise err
+
+        elif mode == "rush_hour_priority_lane":
+            bus_speed = get_config_value("bus_speed")
+
+            try:
+                for neighbor in graph[node]:
+                    edge_data = graph.get_edge_data(node, neighbor)
+
+                    if "is_transfer" in edge_data.keys():
+                        # Handle transfer edges, only proceed if neighbor hasn't been visited in the current path
+                        if neighbor not in visited:
+                            dfs(neighbor, current_time + timedelta(minutes=int(edge_data["weight"])))
+                    else:
+                        # Handle time-dependent edges
+                        for time_entry in edge_data['times']:
+                            if isinstance(time_entry['arrival_time'], str):
+                                time_entry['arrival_time'] = datetime.strptime(time_entry['arrival_time'],
+                                                                               '%Y-%m-%d %H:%M:%S')
+                            if isinstance(time_entry['departure_time'], str):
+                                time_entry['departure_time'] = datetime.strptime(time_entry['departure_time'],
+                                                                                 '%Y-%m-%d %H:%M:%S')
+
+                        next_time_info = None
+                        next_trip_id = None
+
+                        # Find the next valid departure time after the current time
+                        for time_info in edge_data['times']:
+
+                            time_info_copy = copy.deepcopy(time_info)
+
+                            if time_info_copy.get('trip_id') == trip_id:
+                                duration = ((edge_data['len_two_lanes'] / (get_config_value("rush_hour_speed") / 3.6)) + (edge_data["len_more_than_two_lanes"] / (
+                                        bus_speed / 3.6))) / 60
+                                time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
+                                next_time_info = time_info_copy
+                                next_trip_id = time_info_copy.get('trip_id')
+                                break
+                            if time_info_copy['departure_time'] >= current_time:
+                                duration = ((edge_data['len_two_lanes'] / (get_config_value("rush_hour_speed") / 3.6)) + (
+                                            bus_speed / (
+                                            get_config_value("rush_hour_speed") / 3.6))) / 60
+                                time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
+                                next_time_info = time_info_copy
+                                next_trip_id = time_info_copy.get('trip_id')
+                                break
+
+                        # If a valid next time was found, and it's within the allowed time window
+                        if next_time_info and next_time_info['arrival_time'] <= end_time:
+                            dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id)
 
             except Exception as err:
                 raise err
 
         else:
-            raise ValueError("Invalid mode. Please choose either 'normal' or 'rush_hour' mode.")
+            raise ValueError("Invalid mode. Please choose either 'normal', 'rush_hour' or 'rush_hour_priority_lane' mode.")
 
     # Start the DFS with the visited and reachable sets as shared variables
     dfs(start_node, start_time)

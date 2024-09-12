@@ -11,4 +11,5 @@ selected_isochrones_path: data/london/isochrones/selected_isochrones.geojson
 date: "08:00:00"
 minute_threshold: 30
 rush_hour_speed: 14
+bus_speed: 60
 

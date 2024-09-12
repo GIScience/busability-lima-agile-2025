@@ -49,6 +49,20 @@ def test_time_dependent_reachable_nodes_via_bus_network_rush_hour(start_time):
                                                             mode="normal")
     assert result.keys() != result_normal.keys()
 
+def test_time_dependent_reachable_nodes_via_bus_network_rush_hour_priority_lane(start_time):
+    start_node = 4
+    weight_threshold = 20
+    end_time = start_time + timedelta(minutes=weight_threshold)
+    bus_network = create_network_from_gtfs("london", base_path=".", start_time=start_time,
+                                           end_time=start_time + timedelta(minutes=weight_threshold))
+    result = time_dependent_reachable_nodes_via_bus_network(start_node, bus_network, start_time, end_time, mode="rush_hour_priority_lane")
+    result_rush_hour = time_dependent_reachable_nodes_via_bus_network(start_node, bus_network, start_time, end_time, mode="rush_hour")
+    assert result.keys() == {4, 6, 7, 9, 10, 8}
+    result_normal = time_dependent_reachable_nodes_via_bus_network(start_node, bus_network, start_time, end_time,
+                                                            mode="normal")
+    assert result.keys() != result_normal.keys()
+    assert result.keys() != result_rush_hour.keys()
+
 
 def test_get_bus_station_from_isochrone():
     isochrone_node = "test_1.0"
