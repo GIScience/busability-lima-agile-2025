@@ -21,7 +21,7 @@ def test_gtfs_network_analysis(walk_to_busstop_network, walk_from_bus_stop, star
     bus_network = create_network_from_gtfs("london", base_path=".", start_time=start_time, end_time=start_time + timedelta(minutes=weight_threshold))
 
     result = get_multimodal_poi_directness(walk_to_busstop_network, bus_network, walk_from_bus_stop, start_node,
-                                           target_nodes, weight_threshold=weight_threshold, start_time=start_time)
+                                           target_nodes, weight_threshold=weight_threshold, start_time=start_time, mode="normal")
     assert result == {4, 6, 7, 8, 10, 12, 13, 15, 16}
 
 

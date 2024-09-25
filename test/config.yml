@@ -1,15 +1,16 @@
 city_name: London
-pois_gdf_path: test/data/pois_test.gpkg
-iso_polygons_gdf_path: data/london/isochrones/walk_isochrones.gpkg
-drive_iso_gdf_path: test/data/drive_isos_test.gpkg
+pois_gdf_path: data/pois_test.gpkg
+iso_polygons_gdf_path: ../data/london/isochrones/walk_isochrones.gpkg
+drive_iso_gdf_path: data/drive_isos_test.gpkg
 crs: 4326
 matching_column: stop_id
 output_path: results/
-hexagon_gdf_path: data/london/hexagons_9.geojson
-hexagon_centroid_gdf_path: data/london/hexagons_9_centroids.geojson
-selected_isochrones_path: data/london/isochrones/selected_isochrones.geojson
+hexagon_gdf_path: ../data/london/hexagons_9.geojson
+hexagon_centroid_gdf_path: ../data/london/hexagons_9_centroids.geojson
+selected_isochrones_path: ../data/london/isochrones/selected_isochrones.geojson
 date: "08:00:00"
 minute_threshold: 30
 rush_hour_speed: 14
 bus_speed: 60
+mode: normal
 
