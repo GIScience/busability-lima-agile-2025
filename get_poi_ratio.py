@@ -1,32 +1,17 @@
 import pandas as pd
 import geopandas as gpd
-
-from get_hexagons import hexagon
+from tqdm import tqdm
+import logging
+from multiprocessing import Pool
 from network_preprocessing.network_creator import get_drive_isochrone, get_poi_inside_isochrone
 from network_processing.network_analyzer import get_intersected_isochrones
 from utils import get_config_value
 
-try:
-    drive_iso_gdf = gpd.read_file(get_config_value("drive_iso_gdf_path"))
-    pois_gdf = gpd.read_file(get_config_value("pois_gdf_path"))
-    iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
-    hexagon_gdf = gpd.read_file(get_config_value("hexagon_gdf_path"))
-    hexagons_centroids_gdf = gpd.read_file(get_config_value("hexagon_centroid_gdf_path"))
-    walk_isochrones_from_hex = gpd.read_file(get_config_value("walk_isochrones_from_hex_gdf_path"))
-except Exception as e:
-    raise RuntimeError(f"Failed to read input files: {e}")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()
 
-try:
-    drive_iso_gdf = drive_iso_gdf.to_crs(get_config_value("crs"))
-    pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
-    iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
-    hexagon_gdf = hexagon_gdf.to_crs(get_config_value("crs"))
-    hexagons_centroids_gdf = hexagons_centroids_gdf.to_crs(get_config_value("crs"))
-    walk_isochrones_from_start_nodes = walk_isochrones_from_hex.to_crs(get_config_value("crs"))
-except Exception as e:
-    raise RuntimeError(f"Failed to convert CRS: {e}")
-
-for index, row in hexagons_centroids_gdf.iterrows():
+def process_row(row):
+    index = row.name
     try:
         start_node = row[get_config_value("matching_column")]
         drive_iso_for_start_node = get_drive_isochrone(drive_iso_gdf, start_node, matching_column=get_config_value("matching_column"))
@@ -50,14 +35,56 @@ for index, row in hexagons_centroids_gdf.iterrows():
         else:
             poi_ratio = 0
 
-        hexagons_centroids_gdf.loc[index, 'poi_ratio'] = poi_ratio
+        return index, poi_ratio
 
     except Exception as e:
-        print(f"Failed to process row {index} with start_node {start_node}: {e}")
-        hexagons_centroids_gdf.loc[index, 'poi_ratio'] = None
+        logger.error(f"Failed to process row {index} with start_node {start_node}: {e}")
+        return index, None
+
+try:
+    logger.info("Loading input files...")
+    drive_iso_gdf = gpd.read_file(get_config_value("drive_iso_gdf_path"))
+    pois_gdf = gpd.read_file(get_config_value("pois_gdf_path"))
+    iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
+    hexagon_gdf = gpd.read_file(get_config_value("hexagon_gdf_path"))
+    hexagons_centroids_gdf = gpd.read_file(get_config_value("hexagon_centroid_gdf_path"))
+    walk_isochrones_from_hex = gpd.read_file(get_config_value("walk_isochrones_from_hex_gdf_path"))
+except Exception as e:
+    logger.critical(f"Failed to read input files: {e}")
+    raise RuntimeError(f"Failed to read input files: {e}")
+
+try:
+    logger.info("Converting CRS...")
+    crs = get_config_value("crs")
+    drive_iso_gdf = drive_iso_gdf.to_crs(crs)
+    pois_gdf = pois_gdf.to_crs(crs)
+    iso_polygons_gdf = iso_polygons_gdf.to_crs(crs)
+    hexagon_gdf = hexagon_gdf.to_crs(crs)
+    hexagons_centroids_gdf = hexagons_centroids_gdf.to_crs(crs)
+    walk_isochrones_from_start_nodes = walk_isochrones_from_hex.to_crs(crs)
+except Exception as e:
+    logger.critical(f"Failed to convert CRS: {e}")
+    raise RuntimeError(f"Failed to convert CRS: {e}")
+
+try:
+    logger.info("Processing data with multiprocessing...")
+    with Pool() as pool:
+        results = list(tqdm(pool.imap(process_row, [row for _, row in hexagons_centroids_gdf.iterrows()]), total=len(hexagons_centroids_gdf)))
+
+    for index, poi_ratio in results:
+        hexagons_centroids_gdf.loc[index, 'poi_ratio'] = poi_ratio
+
+except Exception as e:
+    logger.critical(f"Failed during processing: {e}")
+    raise RuntimeError(f"Failed during processing: {e}")
 
 try:
     output_path = get_config_value("output_path")
-    hexagons_centroids_gdf.to_file(output_path + get_config_value("city_name") + "_poi_ratio_for_reachable_nodes.geojson", driver="GeoJSON")
+    city_name = get_config_value("city_name")
+    logger.info(f"Saving output to {output_path}{city_name}_poi_ratio_for_reachable_nodes.geojson")
+    hexagons_centroids_gdf.to_file(f"{output_path}{city_name}_poi_ratio_for_reachable_nodes.geojson", driver="GeoJSON")
 except Exception as e:
+    logger.critical(f"Failed to save output file: {e}")
     raise RuntimeError(f"Failed to save output file: {e}")
+
+logger.info("Processing complete.")
