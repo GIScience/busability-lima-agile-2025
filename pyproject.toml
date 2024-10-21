@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "busability"
+version = "0.1.0"
+description = ""
+authors = ["Levi Szamek <levi@szamek.de>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+networkx = "^3.4.2"
+pytest = "^8.3.3"
+pyyaml = "^6.0.2"
+tqdm = "^4.66.5"
+geopandas = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
