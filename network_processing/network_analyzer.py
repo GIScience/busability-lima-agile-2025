@@ -215,7 +215,7 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
 
 def get_nodes_of_intersected_isochrones(isochrones_gdf, hexagon_gdf, matching_column):
     ''' Get the nodes of the intersected isochrones'''
-    intersections = gpd.sjoin(isochrones_gdf, hexagon_gdf, how='inner', op='intersects')
+    intersections = gpd.sjoin(isochrones_gdf, hexagon_gdf, how='inner', predicate='intersects')
 
     node_names = set(intersections[matching_column])
 
