@@ -88,7 +88,7 @@ def get_poi_inside_isochrone(pois_gdf, isochrone_gdf):
         isochrone_gdf = isochrone_gdf.drop(columns="index_right")
     if "index_left" in isochrone_gdf.columns:
         isochrone_gdf = isochrone_gdf.drop(columns="index_left")
-    joined_gdf = gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", op="within")
+    joined_gdf = gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", predicate="within")
     return len(joined_gdf)
 
 
