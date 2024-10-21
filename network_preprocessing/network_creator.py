@@ -215,12 +215,12 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
         min_transfer_time = transfer['min_transfer_time'] / 60
 
         # Add the transfer edge with the minimum transfer time as the weight
-        G.add_edge(from_stop_id, to_stop_id, weight=min_transfer_time, is_transfer=True)
+        G.add_edge(str(from_stop_id), str(to_stop_id), weight=min_transfer_time, is_transfer=True)
 
     # Add lane attributes to the edges
     for _, lane in tqdm(lanes.iterrows(), total=lanes.shape[0], desc="Adding lane attributes"):
-        from_stop_id = lane['start_id']
-        to_stop_id = lane['end_id']
+        from_stop_id = str(lane['start_id'])
+        to_stop_id = str(lane['end_id'])
 
         if not G.has_edge(from_stop_id, to_stop_id):
             continue
