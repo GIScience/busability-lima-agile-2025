@@ -165,7 +165,7 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
 
     # Add nodes based on stops with a progress bar
     for _, stop in tqdm(stops.iterrows(), total=stops.shape[0], desc="Adding nodes"):
-        G.add_node(stop['stop_id'], name=stop['stop_name'], lat=stop['stop_lat'], lon=stop['stop_lon'])
+        G.add_node(str(stop['stop_id']), name=stop['stop_name'], lat=stop['stop_lat'], lon=stop['stop_lon'])
 
     # Add edges based on stop_times with time-dependent weights with a progress bar
     for _, stop_time in tqdm(stop_times.iterrows(), total=stop_times.shape[0], desc="Adding edges"):
@@ -193,15 +193,15 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
                 travel_time_minutes = travel_time.total_seconds() / 60
 
                 # Create an edge with a list of times and trip_id if it doesn't exist yet
-                if G.has_edge(stop_time['stop_id'], next_stop_time['stop_id']):
-                    G[stop_time['stop_id']][next_stop_time['stop_id']]['times'].append({
+                if G.has_edge(str(stop_time['stop_id']), str(next_stop_time['stop_id'])):
+                    G[str(stop_time['stop_id'])][str(next_stop_time['stop_id'])]['times'].append({
                         'departure_time': departure_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'arrival_time': arrival_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'travel_time_minutes': travel_time_minutes,
                         'trip_id': stop_time['trip_id']
                     })
                 else:
-                    G.add_edge(stop_time['stop_id'], next_stop_time['stop_id'], times=[{
+                    G.add_edge(str(stop_time['stop_id']), str(next_stop_time['stop_id']), times=[{
                         'departure_time': departure_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'arrival_time': arrival_time_full.strftime("%Y-%m-%d %H:%M:%S"),
                         'travel_time_minutes': travel_time_minutes,
