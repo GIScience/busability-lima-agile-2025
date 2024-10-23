@@ -24,7 +24,7 @@ def process_row(row):
 
         bus_merged_gdf = gpd.GeoDataFrame(pd.concat([walk_iso_for_start_node, bus_isochrone], ignore_index=True))
 
-        bus_unioned_geometry = bus_merged_gdf.unary_union
+        bus_unioned_geometry = bus_merged_gdf.union_all()
 
         bus_unioned_gdf = gpd.GeoDataFrame(geometry=[bus_unioned_geometry], crs=bus_merged_gdf.crs)
 
