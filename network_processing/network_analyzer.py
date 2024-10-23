@@ -233,6 +233,6 @@ def get_centroids(gdf):
 
 def get_intersected_isochrones(isochrones_gdf, hexagon_centroid_gdf):
     ''' Get the intersected isochrones'''
-    intersections = gpd.sjoin(isochrones_gdf, hexagon_centroid_gdf, how='inner', op='intersects')
+    intersections = gpd.sjoin(isochrones_gdf, hexagon_centroid_gdf, how='inner', predicate='intersects')
 
     return intersections
