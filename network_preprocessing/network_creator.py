@@ -81,13 +81,23 @@ def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[
 
 
 def get_drive_isochrone(drive_isochrones_gdf, start_node, matching_column: str):
-    return drive_isochrones_gdf[drive_isochrones_gdf[matching_column] == start_node]
+    spatial_index = drive_isochrones_gdf.sindex
+
+    possible_matches_index = list(spatial_index.intersection(
+        drive_isochrones_gdf[drive_isochrones_gdf[matching_column] == start_node].geometry.bounds.values[0]
+    ))
+
+    possible_matches = drive_isochrones_gdf.iloc[possible_matches_index]
+
+    precise_match = possible_matches[possible_matches[matching_column] == start_node]
+
+    return precise_match
 
 def get_poi_inside_isochrone(pois_gdf, isochrone_gdf):
-    if "index_right" in isochrone_gdf.columns:
-        isochrone_gdf = isochrone_gdf.drop(columns="index_right")
-    if "index_left" in isochrone_gdf.columns:
-        isochrone_gdf = isochrone_gdf.drop(columns="index_left")
+    columns_to_drop = [col for col in ["index_right", "index_left"] if col in isochrone_gdf.columns]
+    if columns_to_drop:
+        isochrone_gdf = isochrone_gdf.drop(columns=columns_to_drop)
+
     joined_gdf = gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", predicate="within")
     return len(joined_gdf)
 

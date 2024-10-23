@@ -13,12 +13,17 @@ logger = logging.getLogger()
 def process_row(row):
     index = row.name
     try:
-        start_node = row[get_config_value("matching_column")]
+        start_node = hexagons_centroids_gdf.loc[index, get_config_value("matching_column")]
+
+        start_centroid = hexagons_centroids_gdf.loc[index, 'geometry']
+
+        start_centroid = gpd.GeoDataFrame(geometry=[start_centroid], crs=hexagons_centroids_gdf.crs)
+
         drive_iso_for_start_node = get_drive_isochrone(drive_iso_gdf, start_node, matching_column=get_config_value("matching_column"))
 
         pois_count_drive = get_poi_inside_isochrone(pois_gdf, drive_iso_for_start_node)
 
-        walk_iso_for_start_node = get_intersected_isochrones(walk_isochrones_from_start_nodes, hexagons_centroids_gdf)
+        walk_iso_for_start_node = get_intersected_isochrones(start_centroid, hexagons_centroids_gdf)
 
         bus_isochrone = get_intersected_isochrones(iso_polygons_gdf, hexagons_centroids_gdf)
 
