@@ -1,12 +1,12 @@
-city_name: London
-pois_gdf_path: data/test_pois.geojson
-iso_polygons_gdf_path: data/test_walk_iso_for_hex.geojson
-drive_iso_gdf_path: data/test_drive_iso_for_hex.geojson
+city_name: Lima
+pois_gdf_path: data/lima/pois_lima.geojson
+iso_polygons_gdf_path: data/lima/isos_walk_lima.geojson
+drive_iso_gdf_path: data/lima/drive_isos_hex_lima.gpkg
 crs: 4326
-matching_column: hex_id
+matching_column: uuid
 output_path: results/
-hexagon_gdf_path: data/london/hexagons_9.geojson
-hexagon_centroid_gdf_path: data/test_hex_centroids.geojson
+hexagon_gdf_path: data/lima/hexagons_lima.geojson
+hexagon_centroid_gdf_path: data/lima/hex_centroids_lima.gpkg
 selected_isochrones_path: data/london/isochrones/selected_isochrones.geojson
 date: "17:00:00"
 minute_threshold: 30
@@ -14,4 +14,4 @@ rush_hour_speed: 14
 bus_speed: 60
 walk_isochrones_from_hex_gdf_path: data/test_walk_iso_for_hex.geojson
 mode: normal
-
+computed_iso_polygons_gdf_path: data/lima/calc_isos_lima.geojson

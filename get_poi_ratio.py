@@ -4,7 +4,7 @@ from tqdm import tqdm
 import logging
 from multiprocessing import Pool
 from network_preprocessing.network_creator import get_drive_isochrone, get_poi_inside_isochrone
-from network_processing.network_analyzer import get_intersected_isochrones
+from network_processing.network_analyzer import get_intersected_isochrones, get_multimodal_isos
 from utils import get_config_value
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -23,11 +23,13 @@ def process_row(row):
 
         pois_count_drive = get_poi_inside_isochrone(pois_gdf, drive_iso_for_start_node)
 
-        walk_iso_for_start_node = get_intersected_isochrones(start_centroid, hexagons_centroids_gdf)
+        walk_iso_from_start_centroid = walk_isochrones_from_hex[walk_isochrones_from_hex[get_config_value("matching_column")] == start_node]
 
-        bus_isochrone = get_intersected_isochrones(iso_polygons_gdf, hexagons_centroids_gdf)
+        walk_isos_for_start_node = get_intersected_isochrones(iso_polygons_gdf, start_centroid)
 
-        bus_merged_gdf = gpd.GeoDataFrame(pd.concat([walk_iso_for_start_node, bus_isochrone], ignore_index=True))
+        calc_isos_for_start_node = get_multimodal_isos(calc_isochrones_gdf, walk_isos_for_start_node)
+
+        bus_merged_gdf = gpd.GeoDataFrame(pd.concat([walk_iso_from_start_centroid, calc_isos_for_start_node], ignore_index=True))
 
         bus_unioned_geometry = bus_merged_gdf.union_all()
 
@@ -53,6 +55,7 @@ try:
     iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
     hexagon_gdf = gpd.read_file(get_config_value("hexagon_gdf_path"))
     hexagons_centroids_gdf = gpd.read_file(get_config_value("hexagon_centroid_gdf_path"))
+    calc_isochrones_gdf = gpd.read_file(get_config_value("computed_iso_polygons_gdf_path"))
     walk_isochrones_from_hex = gpd.read_file(get_config_value("walk_isochrones_from_hex_gdf_path"))
 except Exception as e:
     logger.critical(f"Failed to read input files: {e}")
@@ -66,6 +69,7 @@ try:
     iso_polygons_gdf = iso_polygons_gdf.to_crs(crs)
     hexagon_gdf = hexagon_gdf.to_crs(crs)
     hexagons_centroids_gdf = hexagons_centroids_gdf.to_crs(crs)
+    calc_isochrones_gdf = calc_isochrones_gdf.to_crs(crs)
     walk_isochrones_from_start_nodes = walk_isochrones_from_hex.to_crs(crs)
 except Exception as e:
     logger.critical(f"Failed to convert CRS: {e}")

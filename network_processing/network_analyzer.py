@@ -236,3 +236,12 @@ def get_intersected_isochrones(isochrones_gdf, hexagon_centroid_gdf):
     intersections = gpd.sjoin(isochrones_gdf, hexagon_centroid_gdf, how='inner', predicate='intersects')
 
     return intersections
+
+def get_multimodal_isos(multimodal_isochrones, walk_isochrones):
+    ''' Get the multimodal isochrones'''
+    intersected_walk_isos = walk_isochrones.loc[walk_isochrones.groupby('stop_id')['value'].idxmax()]
+    intersected_walk_isos_names = intersected_walk_isos['stop_id'].astype(str) + "_" + float(intersected_walk_isos['value'] / 60)
+    multimodal_isos = multimodal_isochrones[multimodal_isochrones['stop_id'].isin(intersected_walk_isos_names)]
+    return multimodal_isos
+
+
