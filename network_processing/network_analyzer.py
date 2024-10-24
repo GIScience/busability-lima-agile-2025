@@ -240,7 +240,7 @@ def get_intersected_isochrones(isochrones_gdf, hexagon_centroid_gdf):
 def get_multimodal_isos(multimodal_isochrones, walk_isochrones):
     ''' Get the multimodal isochrones'''
     intersected_walk_isos = walk_isochrones.loc[walk_isochrones.groupby('stop_id')['value'].idxmax()]
-    intersected_walk_isos_names = intersected_walk_isos['stop_id'].astype(str) + "_" + float(intersected_walk_isos['value'] / 60)
+    intersected_walk_isos_names = [row['stop_id'].astype(str) + "_" + float(row['value'] / 60) for i, row in intersected_walk_isos.iterrows()]
     multimodal_isos = multimodal_isochrones[multimodal_isochrones['stop_id'].isin(intersected_walk_isos_names)]
     return multimodal_isos
 
