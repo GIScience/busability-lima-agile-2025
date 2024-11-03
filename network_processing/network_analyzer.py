@@ -90,16 +90,36 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                             time_info_copy = copy.deepcopy(time_info)
 
+                            len_two_lanes = edge_data.get('len_two_lanes', 0)
+                            len_more_than_two_lanes = edge_data.get('len_more_than_two_lanes', 0)
+
                             if time_info_copy.get('trip_id') == trip_id:
-                                duration = (edge_data['len_two_lanes'] + edge_data["len_more_than_two_lanes"]) / (
-                                            get_config_value("rush_hour_speed") / 3.6) / 60
+
+                                # Calculate duration safely, including only non-zero values
+                                total_length = 0
+                                if len_two_lanes > 0:
+                                    total_length += len_two_lanes
+                                if len_more_than_two_lanes > 0:
+                                    total_length += len_more_than_two_lanes
+
+                                duration = (total_length / (get_config_value(
+                                    "rush_hour_speed") / 3.6)) / 60  # Convert seconds to minutes
+
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
                                 next_trip_id = time_info_copy.get('trip_id')
                                 break
+
                             if time_info_copy['departure_time'] >= current_time:
-                                duration = (edge_data['len_two_lanes'] + edge_data["len_more_than_two_lanes"]) / (
-                                            get_config_value("rush_hour_speed") / 3.6) / 60
+                                total_length = 0
+                                if len_two_lanes > 0:
+                                    total_length += len_two_lanes
+                                if len_more_than_two_lanes > 0:
+                                    total_length += len_more_than_two_lanes
+
+                                duration = (total_length / (get_config_value(
+                                    "rush_hour_speed") / 3.6)) / 60  # Convert seconds to minutes
+
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
                                 next_trip_id = time_info_copy.get('trip_id')
@@ -140,17 +160,32 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                             time_info_copy = copy.deepcopy(time_info)
 
+                            len_two_lanes = edge_data.get('len_two_lanes', 0)
+                            len_more_than_two_lanes = edge_data.get('len_more_than_two_lanes', 0)
+
                             if time_info_copy.get('trip_id') == trip_id:
-                                duration = ((edge_data['len_two_lanes'] / (get_config_value("rush_hour_speed") / 3.6)) + (edge_data["len_more_than_two_lanes"] / (
-                                        bus_speed / 3.6))) / 60
+
+                                # Avoid division by zero by checking if values are non-zero
+                                duration = 0
+                                if len_two_lanes > 0:
+                                    duration += len_two_lanes / (get_config_value("rush_hour_speed") / 3.6)
+                                if len_more_than_two_lanes > 0:
+                                    duration += len_more_than_two_lanes / (bus_speed / 3.6)
+                                duration /= 60  # Convert seconds to minutes
+
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
                                 next_trip_id = time_info_copy.get('trip_id')
                                 break
+
                             if time_info_copy['departure_time'] >= current_time:
-                                duration = ((edge_data['len_two_lanes'] / (get_config_value("rush_hour_speed") / 3.6)) + (
-                                            bus_speed / (
-                                            get_config_value("rush_hour_speed") / 3.6))) / 60
+                                duration = 0
+                                if len_two_lanes > 0:
+                                    duration += len_two_lanes / (get_config_value("rush_hour_speed") / 3.6)
+                                if len_more_than_two_lanes > 0:
+                                    duration += bus_speed / (get_config_value("rush_hour_speed") / 3.6)
+                                duration /= 60  # Convert seconds to minutes
+
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
                                 next_trip_id = time_info_copy.get('trip_id')
