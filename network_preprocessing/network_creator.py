@@ -238,8 +238,8 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
         len_two_lanes = lane['len_two_lanes'] if lane['len_two_lanes'] is not None else 0
         len_more_than_two_lanes = lane['len_more_than_two_lanes'] if lane['len_more_than_two_lanes'] is not None else 0
 
-        G[from_stop_id][to_stop_id]['len_two_lanes'] = len_two_lanes
-        G[from_stop_id][to_stop_id]['len_more_than_two_lanes'] = len_more_than_two_lanes
+        G[from_stop_id][to_stop_id]['len_two_lanes'] = str(len_two_lanes)
+        G[from_stop_id][to_stop_id]['len_more_than_two_lanes'] = str(len_more_than_two_lanes)
 
     logging.log(logging.INFO, "GTFS graph created.")
 

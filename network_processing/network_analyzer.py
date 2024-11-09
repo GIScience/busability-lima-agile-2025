@@ -90,8 +90,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                             time_info_copy = copy.deepcopy(time_info)
 
-                            len_two_lanes = edge_data.get('len_two_lanes', 0)
-                            len_more_than_two_lanes = edge_data.get('len_more_than_two_lanes', 0)
+                            len_two_lanes = float(edge_data.get('len_two_lanes', 0))
+                            len_more_than_two_lanes = float(edge_data.get('len_more_than_two_lanes', 0))
 
                             if time_info_copy.get('trip_id') == trip_id:
 
@@ -160,8 +160,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                             time_info_copy = copy.deepcopy(time_info)
 
-                            len_two_lanes = edge_data.get('len_two_lanes', 0)
-                            len_more_than_two_lanes = edge_data.get('len_more_than_two_lanes', 0)
+                            len_two_lanes = float(edge_data.get('len_two_lanes', 0))
+                            len_more_than_two_lanes = float(edge_data.get('len_more_than_two_lanes', 0))
 
                             if time_info_copy.get('trip_id') == trip_id:
 
