@@ -93,7 +93,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                             len_two_lanes = float(edge_data.get('len_two_lanes', 0))
                             len_more_than_two_lanes = float(edge_data.get('len_more_than_two_lanes', 0))
 
-                            if time_info_copy.get('trip_id') == trip_id:
+                            if time_info_copy.get('trip_id') == trip_id or len(visited) == 1:
 
                                 # Calculate duration safely, including only non-zero values
                                 total_length = 0
@@ -163,7 +163,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                             len_two_lanes = float(edge_data.get('len_two_lanes', 0))
                             len_more_than_two_lanes = float(edge_data.get('len_more_than_two_lanes', 0))
 
-                            if time_info_copy.get('trip_id') == trip_id:
+                            if time_info_copy.get('trip_id') == trip_id or len(visited) == 1:
 
                                 # Avoid division by zero by checking if values are non-zero
                                 duration = 0
