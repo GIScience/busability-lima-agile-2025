@@ -28,7 +28,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
     reachable = {}
 
     def dfs(node, current_time, trip_id=None):
-        if current_time > end_time:
+        if current_time.time() > end_time.time():
             return
 
         # Mark the current node as reachable at the current time
@@ -38,6 +38,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
         if mode == "normal":
             try:
                 for neighbor in graph[node]:
+                    if neighbor in visited:
+                        continue
                     edge_data = graph.get_edge_data(node, neighbor)
 
                     if "is_transfer" in edge_data.keys():
@@ -56,11 +58,11 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
                         # Find the next valid departure time after the current time
                         for time_info in edge_data['times']:
-                            if time_info['departure_time'] >= current_time:
+                            if time_info['departure_time'].time() >= current_time.time():
                                 next_time_info = time_info
-                                if next_time_info['arrival_time'] <= end_time:
+                                if next_time_info['arrival_time'].time() <= end_time.time():
                                     dfs(neighbor, next_time_info['arrival_time'])
-                                    #TODO: break?
+                                    break
 
             except Exception as err:
                 raise err
@@ -68,6 +70,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
         elif mode == "rush_hour":
             try:
                 for neighbor in graph[node]:
+                    if neighbor in visited:
+                        continue
                     edge_data = graph.get_edge_data(node, neighbor)
 
                     if "is_transfer" in edge_data.keys():
@@ -110,7 +114,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 next_trip_id = time_info_copy.get('trip_id')
                                 break
 
-                            if time_info_copy['departure_time'] >= current_time:
+                            if time_info_copy['departure_time'].time() >= current_time.time():
                                 total_length = 0
                                 if len_two_lanes > 0:
                                     total_length += len_two_lanes
@@ -126,7 +130,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 break
 
                         # If a valid next time was found, and it's within the allowed time window
-                        if next_time_info and next_time_info['arrival_time'] <= end_time:
+                        if next_time_info and next_time_info['arrival_time'].time() <= end_time.time():
                             dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id)
             except Exception as err:
                 raise err
@@ -136,6 +140,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
 
             try:
                 for neighbor in graph[node]:
+                    if neighbor in visited:
+                        continue
                     edge_data = graph.get_edge_data(node, neighbor)
 
                     if "is_transfer" in edge_data.keys():
@@ -178,13 +184,14 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 next_trip_id = time_info_copy.get('trip_id')
                                 break
 
-                            if time_info_copy['departure_time'] >= current_time:
+                            if time_info_copy['departure_time'].time() >= current_time.time():
                                 duration = 0
                                 if len_two_lanes > 0:
                                     duration += len_two_lanes / (get_config_value("rush_hour_speed") / 3.6)
                                 if len_more_than_two_lanes > 0:
-                                    duration += bus_speed / (get_config_value("rush_hour_speed") / 3.6)
-                                duration /= 60  # Convert seconds to minutes
+                                    duration += len_more_than_two_lanes / (bus_speed / 3.6)
+                                duration /= 60
+
 
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
@@ -192,7 +199,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 break
 
                         # If a valid next time was found, and it's within the allowed time window
-                        if next_time_info and next_time_info['arrival_time'] <= end_time:
+                        if next_time_info and next_time_info['arrival_time'].time() <= end_time.time():
                             dfs(neighbor, next_time_info['arrival_time'], trip_id=next_trip_id)
 
             except Exception as err:
@@ -214,7 +221,12 @@ def reachable_nodes_to_pois(bus_graph, nodes_dict, end_time):
     for node, current_time in nodes_dict.items():
         if node not in bus_graph:
             continue
-        remaining_time = (end_time - current_time).total_seconds() / 60
+
+        placeholder_date = datetime(2000, 1, 1)
+        end_time_placeholder = datetime.combine(placeholder_date, end_time.time())
+        current_time_placeholder = datetime.combine(placeholder_date, current_time.time())
+
+        remaining_time = (end_time_placeholder - current_time_placeholder).total_seconds() / 60
         paths = nx.single_source_dijkstra(bus_graph, node, weight='weight', cutoff=remaining_time)
         all_nodes.update(paths[0].keys())
     return all_nodes

@@ -43,6 +43,8 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
     logging.log(logging.INFO, "Creating walk graph...")
     walk_graph = bus_graph.copy()
 
+    walk_graph.clear_edges()
+
     # Iterate over each row in the isochrones_gdf
     for idx, row in isochrones_gdf.iterrows():
         name = row.get(matching_name)
@@ -59,8 +61,8 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
             walk_graph.add_node(new_node_name, **node_attributes)
 
         # Add the edge between the existing node and the new node
-        walk_graph.add_edge(name, new_node_name, weight=value)
-        walk_graph.add_edge(new_node_name, name, weight=value)
+        walk_graph.add_edge(name, new_node_name, weight=int(value))
+        walk_graph.add_edge(new_node_name, name, weight=int(value))
 
     # Return the new graph
     return walk_graph
@@ -68,8 +70,10 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
 def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[str], start_node: str, crs: int = 32718):
     ''' Get the union of the polygons that are reachable from the nodes in the graph'''
 
+    if not polygon_names or all('_' not in item for item in polygon_names):
+        return None
     # union the polygons
-    union = gdf[gdf[matching_column].isin(polygon_names)].unary_union
+    union = gdf[gdf["matching"].isin(polygon_names)].unary_union
 
     union_gdf = gpd.GeoDataFrame(geometry=[union])
 
@@ -99,6 +103,7 @@ def get_poi_inside_isochrone(pois_gdf, isochrone_gdf):
         isochrone_gdf = isochrone_gdf.drop(columns=columns_to_drop)
 
     joined_gdf = gpd.sjoin(pois_gdf, isochrone_gdf, how="inner", predicate="within")
+
     return len(joined_gdf)
 
 
@@ -225,12 +230,16 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
         min_transfer_time = transfer['min_transfer_time'] / 60
 
         # Add the transfer edge with the minimum transfer time as the weight
-        G.add_edge(str(from_stop_id), str(to_stop_id), weight=min_transfer_time, is_transfer=True)
+        G.add_edge(str(from_stop_id), str(to_stop_id), weight=int(min_transfer_time), is_transfer=True)
 
     # Add lane attributes to the edges
     for _, lane in tqdm(lanes.iterrows(), total=lanes.shape[0], desc="Adding lane attributes"):
-        from_stop_id = str(lane['start_id'])
-        to_stop_id = str(lane['end_id'])
+        try:
+            from_stop_id = str(int(lane['start_id']))
+            to_stop_id = str(int(lane['end_id']))
+        except ValueError:
+            from_stop_id = str(lane['start_id'])
+            to_stop_id = str(lane['end_id'])
 
         if not G.has_edge(from_stop_id, to_stop_id):
             continue
