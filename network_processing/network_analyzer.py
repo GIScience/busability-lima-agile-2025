@@ -35,6 +35,8 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
         reachable[node] = current_time
         visited.add(node)
 
+        load_time = 0.5
+
         if mode == "normal":
             try:
                 for neighbor in graph[node]:
@@ -109,6 +111,7 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                 duration = (total_length / (get_config_value(
                                     "rush_hour_speed") / 3.6)) / 60  # Convert seconds to minutes
 
+                                duration += load_time
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy
                                 next_trip_id = time_info_copy.get('trip_id')
@@ -177,7 +180,9 @@ def time_dependent_reachable_nodes_via_bus_network(start_node, graph, start_time
                                     duration += len_two_lanes / (get_config_value("rush_hour_speed") / 3.6)
                                 if len_more_than_two_lanes > 0:
                                     duration += len_more_than_two_lanes / (bus_speed / 3.6)
-                                duration /= 60  # Convert seconds to minutes
+                                duration /= 60
+
+                                duration += load_time
 
                                 time_info_copy['arrival_time'] = current_time + timedelta(minutes=duration)
                                 next_time_info = time_info_copy

@@ -23,8 +23,6 @@ iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
 #hexagons_centroids_gdf = gpd.read_file(get_config_value("hexagon_centroid_gdf_path"))
 
 # Set CRS for all GeoDataFrames
-drive_iso_gdf = drive_iso_gdf.to_crs(get_config_value("crs"))
-pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
 # drive_iso_gdf = drive_iso_gdf.to_crs(get_config_value("crs"))
 # pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
 iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
