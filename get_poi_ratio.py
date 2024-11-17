@@ -42,11 +42,11 @@ def process_row(row):
         else:
             poi_ratio = 0
 
-        return index, poi_ratio
+        return index, poi_ratio, bus_unioned_gdf
 
     except Exception as e:
-        logger.error(f"Failed to process row {index} with start_node {start_node}: {e}")
-        return index, None
+        logger.error(f"Failed to process row {index}: {e}")
+        return index, None, None
 
 try:
     logger.info("Loading input files...")
