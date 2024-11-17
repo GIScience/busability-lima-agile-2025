@@ -41,12 +41,11 @@ def process_row(row):
             poi_ratio = pois_count_bus / pois_count_drive
         else:
             poi_ratio = 0
-
-        return index, poi_ratio, bus_unioned_gdf
+        return index, poi_ratio, pois_count_bus, pois_count_drive, bus_unioned_gdf
 
     except Exception as e:
         logger.error(f"Failed to process row {index}: {e}")
-        return index, None, None
+        return index, None, None, None, None
 
 try:
     logger.info("Loading input files...")
@@ -80,9 +79,11 @@ try:
     with Pool() as pool:
         results = list(tqdm(pool.imap(process_row, [row for _, row in hexagons_centroids_gdf.iterrows()]), total=len(hexagons_centroids_gdf)))
     gdf_list = []
-    for index, poi_ratio, bus_gdf in results:
+    for index, poi_ratio, pois_count_bus, pois_count_drive, bus_gdf in results:
         gdf_list.append(bus_gdf)
         hexagons_centroids_gdf.loc[index, 'poi_ratio'] = poi_ratio
+        hexagons_centroids_gdf.loc[index, 'pois_count_bus'] = pois_count_bus
+        hexagons_centroids_gdf.loc[index, 'pois_count_drive'] = pois_count_drive
 
 except Exception as e:
     logger.critical(f"Failed during processing: {e}")
