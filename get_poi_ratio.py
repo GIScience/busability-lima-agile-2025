@@ -80,6 +80,7 @@ try:
         results = list(tqdm(pool.imap(process_row, [row for _, row in hexagons_centroids_gdf.iterrows()]), total=len(hexagons_centroids_gdf)))
     gdf_list = []
     for index, poi_ratio, pois_count_bus, pois_count_drive, bus_gdf in results:
+        bus_gdf["uuid"] = hexagons_centroids_gdf.loc[index, "uuid"]
         gdf_list.append(bus_gdf)
         hexagons_centroids_gdf.loc[index, 'poi_ratio'] = poi_ratio
         hexagons_centroids_gdf.loc[index, 'pois_count_bus'] = pois_count_bus
