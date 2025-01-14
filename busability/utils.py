@@ -1,8 +1,6 @@
 import os
-from datetime import datetime
 
 import yaml
-import geopandas as gpd
 
 
 def get_row_by_column(gdf, column_name, value, bus_isochrone: bool = False):
@@ -23,14 +21,14 @@ def get_row_by_column(gdf, column_name, value, bus_isochrone: bool = False):
     filtered_gdf = gdf[gdf[column_name] == value]
 
     if bus_isochrone:
-        filtered_gdf = filtered_gdf[filtered_gdf['value'] == 900]
+        filtered_gdf = filtered_gdf[filtered_gdf["value"] == 900]
 
     return filtered_gdf.to_crs(epsg=4326)
 
 
 def load_config_from_file() -> dict:
     """Load configuration from file on disk."""
-    path = "config.yml"
+    path = "../config.yml"
     if os.path.isfile(path):
         with open(path, "r") as f:
             return yaml.safe_load(f)

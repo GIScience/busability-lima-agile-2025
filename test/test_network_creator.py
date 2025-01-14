@@ -1,38 +1,43 @@
 from datetime import timedelta
 
 import networkx as nx
-from shapely import Point
 
-from busability.network_preprocessing.network_creator import calculate_distance, gdf_to_nodes_and_weighted_edges, \
-    create_walk_edges, get_union_reachable_polygons, get_drive_isochrone, get_poi_inside_isochrone, \
-    create_network_from_gtfs, get_graphs, save_graph_to_file
-from network_preprocessing.network_creator import load_graph_from_file
+from busability.network_preprocessing.network_creator import (
+    calculate_distance,
+    get_union_reachable_polygons,
+    get_drive_isochrone,
+    get_poi_inside_isochrone,
+    create_network_from_gtfs,
+    get_graphs,
+    save_graph_to_file,
+)
+from busability.network_preprocessing.network_creator import load_graph_from_file
 
 
 def test_calculate_distance(point1, point2):
     assert calculate_distance(point1, point2) == 1
 
 
-def test_calculate_distance(point1):
-    assert calculate_distance(point1, point1) == 0
-
-
 def test_get_union_reachable_polygons(bus_isochrones_gdf):
-    start_node = 'CALLE 24'
-    reachable_stops = ['CALLE 25', 'CALLE 37']
-    union_gdf = get_union_reachable_polygons(bus_isochrones_gdf, 'APROXIMACION', reachable_stops, start_node, crs=32718)
+    start_node = "CALLE 24"
+    reachable_stops = ["CALLE 25", "CALLE 37"]
+    union_gdf = get_union_reachable_polygons(
+        bus_isochrones_gdf, "APROXIMACION", reachable_stops, start_node, crs=32718
+    )
     assert union_gdf is not None
     assert len(union_gdf) == 1
-    assert union_gdf.iloc[0]['geometry'].geom_type == 'Polygon'
+    assert union_gdf.iloc[0]["geometry"].geom_type == "Polygon"
     assert union_gdf.crs == 32718
-    assert union_gdf.iloc[0]['APROXIMACION'] == 'CALLE 24'
+    assert union_gdf.iloc[0]["APROXIMACION"] == "CALLE 24"
+
 
 def test_get_drive_isochrone(drive_isos_gdf):
-    drive_iso = get_drive_isochrone(drive_isos_gdf, 'EL PORTILLO_2.0', 'APROXIMACION')
+    drive_iso = get_drive_isochrone(drive_isos_gdf, "EL PORTILLO_2.0", "APROXIMACION")
     assert drive_iso is not None
     assert len(drive_iso) == 1
-    assert drive_iso.iloc[0]['geometry'].geom_type == 'Polygon'
-    assert drive_iso.iloc[0]['APROXIMACION'] == 'EL PORTILLO_2.0'
+    assert drive_iso.iloc[0]["geometry"].geom_type == "Polygon"
+    assert drive_iso.iloc[0]["APROXIMACION"] == "EL PORTILLO_2.0"
+
 
 def test_get_poi_inside_isochrone(pois_gdf, bus_isochrones_gdf):
     pois = get_poi_inside_isochrone(pois_gdf, bus_isochrones_gdf)
@@ -42,7 +47,12 @@ def test_get_poi_inside_isochrone(pois_gdf, bus_isochrones_gdf):
 
 
 def test_create_network_from_gtfs(start_time):
-    graph = create_network_from_gtfs("london", base_path=".", start_time=start_time, end_time=start_time + timedelta(minutes=30))
+    graph = create_network_from_gtfs(
+        "london",
+        base_path="",
+        start_time=start_time,
+        end_time=start_time + timedelta(minutes=30),
+    )
     assert graph is not None
     assert len(graph.nodes) > 0
     assert len(graph.edges) > 0
@@ -59,7 +69,14 @@ def test_create_network_from_gtfs(start_time):
 def test_get_graphs(start_time, bus_isochrones_gdf):
     matching_column = "stop_id"
     end_time = start_time + timedelta(minutes=30)
-    bus_graph, walk_graph = get_graphs("london", start_time, end_time, bus_isochrones_gdf, matching_column, path_to_gtfs=".")
+    bus_graph, walk_graph = get_graphs(
+        "london",
+        start_time,
+        end_time,
+        bus_isochrones_gdf,
+        matching_column,
+        path_to_gtfs="",
+    )
     assert bus_graph is not None
     assert walk_graph is not None
     assert len(bus_graph.nodes) < len(walk_graph.nodes)
@@ -67,11 +84,10 @@ def test_get_graphs(start_time, bus_isochrones_gdf):
 
 
 def test_save_graph_to_file():
-
     G = nx.Graph()
 
     G.add_node(1, times=[1, 2, 3])
-    G.add_node(2, attribute=['a', 'b', 'c'])
+    G.add_node(2, attribute=["a", "b", "c"])
     G.add_edge(1, 2)
 
     path = "data/test_graph_with_lists.gml"
