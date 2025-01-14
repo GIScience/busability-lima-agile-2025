@@ -19,7 +19,6 @@ def get_bus_station_from_isochrone(node):
 
 def reachable_nodes_via_bus_network(bus_graph, node, remaining_weight, current_time, end_time, mode):
     '''Get all reachable nodes via the bus network remaining weight.'''
-    #paths = nx.single_source_dijkstra(bus_graph, node, weight='weight', cutoff=remaining_weight)
     return time_dependent_reachable_nodes_via_bus_network(node, bus_graph, current_time, end_time, mode)
 
 
@@ -248,19 +247,14 @@ def get_multimodal_poi_directness(to_bus_stop_graph, bus_stop_graph, from_bus_st
     if path_length > weight_threshold:
         return set()
 
-    # Step 3: Find all reachable nodes from the nearest bus stop node within the remaining weight
     current_time = start_time + timedelta(minutes=path_length)
     remaining_time = weight_threshold - path_length
 
     reachable_nodes_dict = reachable_nodes_via_bus_network(bus_stop_graph, bus_node, remaining_time, current_time, end_time, mode=mode)
     reachable_nodes.update(reachable_nodes_dict.keys())
-    # Step 4: Find all reachable nodes from the bus stop nodes to POIs
     all_reachable_nodes = reachable_nodes_to_pois(from_bus_stop_graph, reachable_nodes_dict, end_time)
 
     reachable_nodes.update(all_reachable_nodes)
-    # Step 5: Calculate the number of POIs reachable from the start node
-    # node_attributes = nx.get_node_attributes(from_bus_stop_graph, 'poi')
-    # poi_count = sum(node_attributes.get(node, 0) for node in all_reachable_nodes)
 
     return reachable_nodes
 

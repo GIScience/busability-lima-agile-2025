@@ -13,7 +13,7 @@ def calculate_distance(point1, point2):
     return point1.distance(point2) / 100
 
 
-# Function to convert GeoDataFrame to nodes with attributes and create edges with weights
+
 def gdf_to_nodes_and_weighted_edges(gdf, matching_name):
     ''' Create nodes and edges from a GeoDataFrame from each bus stop'''
     nodes = []
@@ -22,7 +22,6 @@ def gdf_to_nodes_and_weighted_edges(gdf, matching_name):
     for idx, row in gdf.iterrows():
         point = row['geometry']
         name = row.get(matching_name)
-        #node = (name, {'name': name, 'point': point, "poi": get_poi_data_for_bus_isochrone(isochrones_gdf, matching_name, row[matching_name])})
         node = (name, {'name': name, 'point': point})
         nodes.append(node)
 
@@ -45,15 +44,12 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
 
     walk_graph.clear_edges()
 
-    # Iterate over each row in the isochrones_gdf
     for idx, row in isochrones_gdf.iterrows():
         name = row.get(matching_name)
         value = row.get('value') / 60
 
-        # The name for the new node
         new_node_name = f"{name}_{value}"
 
-        # Create the new node with attributes
         node_attributes = {'name': new_node_name}
 
         # Add the new node to the graph if it doesn't exist
@@ -64,7 +60,6 @@ def create_walk_edges(bus_graph, isochrones_gdf, matching_name):
         walk_graph.add_edge(name, new_node_name, weight=int(value))
         walk_graph.add_edge(new_node_name, name, weight=int(value))
 
-    # Return the new graph
     return walk_graph
 
 def get_union_reachable_polygons(gdf, matching_column: str, polygon_names: List[str], start_node: str, crs: int = 32718):
@@ -119,7 +114,6 @@ def create_network_from_gtfs(city, start_time, end_time, base_path=None):
     - A graph created from the GTFS data.
     """
 
-    # Use the provided base_path or the directory of this script
     if base_path is None:
         path = os.path.join( "data", city.lower(), "gtfs")
     else:
@@ -159,11 +153,9 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
         except ValueError:
             return None
 
-    # Convert start_time and end_time to datetime.time objects
     start_time = pd.to_datetime(start_time, format='%H:%M:%S').time()
     end_time = pd.to_datetime(end_time, format='%H:%M:%S').time()
 
-    # Assuming stop_times is your DataFrame
     stop_times['arrival_time'] = stop_times['arrival_time'].apply(convert_to_time)
     stop_times['departure_time'] = stop_times['departure_time'].apply(convert_to_time)
 
@@ -175,20 +167,16 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
         (stop_times['departure_time'] >= start_time) & (stop_times['departure_time'] <= end_time)
         ]
 
-    # Create a directed graph
     G = nx.DiGraph()
 
-    # Add nodes based on stops with a progress bar
     for _, stop in tqdm(stops.iterrows(), total=stops.shape[0], desc="Adding nodes"):
         G.add_node(str(stop['stop_id']), name=stop['stop_name'], lat=stop['stop_lat'], lon=stop['stop_lon'])
 
-    # Add edges based on stop_times with time-dependent weights with a progress bar
+
     for _, stop_time in tqdm(stop_times.iterrows(), total=stop_times.shape[0], desc="Adding edges"):
-        # Skip rows with None in departure_time or arrival_time
         if stop_time['departure_time'] is None or stop_time['arrival_time'] is None:
             continue
 
-        # Check if the departure time is within the specified time range
         if start_time <= stop_time['departure_time'] <= end_time:
             # Find the next stop in the trip sequence
             next_stop_time = stop_times[(stop_times['trip_id'] == stop_time['trip_id']) &
@@ -197,7 +185,6 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
             if not next_stop_time.empty:
                 next_stop_time = next_stop_time.iloc[0]
 
-                # Skip rows with None in next_stop_time's times
                 if next_stop_time['departure_time'] is None or next_stop_time['arrival_time'] is None:
                     continue
 
@@ -223,16 +210,13 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
                         'trip_id': stop_time['trip_id']
                     }])
 
-    # Add transfer edges from the transfers.txt file with a progress bar
     for _, transfer in tqdm(transfers.iterrows(), total=transfers.shape[0], desc="Adding transfer edges"):
         from_stop_id = transfer['from_stop_id']
         to_stop_id = transfer['to_stop_id']
         min_transfer_time = transfer['min_transfer_time'] / 60
 
-        # Add the transfer edge with the minimum transfer time as the weight
         G.add_edge(str(from_stop_id), str(to_stop_id), weight=int(min_transfer_time), is_transfer=True)
 
-    # Add lane attributes to the edges
     for _, lane in tqdm(lanes.iterrows(), total=lanes.shape[0], desc="Adding lane attributes"):
         try:
             from_stop_id = str(int(lane['start_id']))
@@ -257,8 +241,6 @@ def create_gtfs_graph(stops, stop_times, transfers, lanes, start_time, end_time)
 
 
 def save_graph_to_file(graph, filename):
-     # Assuming G is your graph
-
     logging.log(logging.INFO, "Saving graph to file: " + filename)
     nx.write_gml(graph, filename)
 

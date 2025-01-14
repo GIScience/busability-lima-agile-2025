@@ -68,10 +68,8 @@ def test_get_graphs(start_time, bus_isochrones_gdf):
 
 def test_save_graph_to_file():
 
-    # Create a graph
     G = nx.Graph()
 
-    # Add nodes with list attributes
     G.add_node(1, times=[1, 2, 3])
     G.add_node(2, attribute=['a', 'b', 'c'])
     G.add_edge(1, 2)

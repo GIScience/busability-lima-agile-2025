@@ -17,17 +17,14 @@ def get_row_by_column(gdf, column_name, value, bus_isochrone: bool = False):
     Returns:
     GeoDataFrame: A GeoDataFrame containing the matched row.
     """
-    # Check if column exists in the GeoDataFrame
     if column_name not in gdf.columns:
         raise ValueError(f"Column '{column_name}' does not exist in the GeoDataFrame.")
 
-    # Filter the GeoDataFrame based on the column and value
     filtered_gdf = gdf[gdf[column_name] == value]
 
     if bus_isochrone:
         filtered_gdf = filtered_gdf[filtered_gdf['value'] == 900]
 
-    # Return the filtered GeoDataFrame
     return filtered_gdf.to_crs(epsg=4326)
 
 

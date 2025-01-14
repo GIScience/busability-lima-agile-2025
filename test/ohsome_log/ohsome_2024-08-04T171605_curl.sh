@@ -1,1 +1,0 @@
-curl -X POST -H "user-agent: ohsome-py/0.3.0" -H "Accept-Encoding: gzip, deflate, br" -H "Accept: */*" -H "Connection: keep-alive" -H "Content-Length: 115" -H "Content-Type: application/x-www-form-urlencoded" -d 'bpolys=%7B%22type%22%3A+%22FeatureCollection%22%2C+%22features%22%3A+%5B%5D%7D&time=2021-01-01&filter=amenity%3D%2A' https://api.ohsome.org/v1/elements/count

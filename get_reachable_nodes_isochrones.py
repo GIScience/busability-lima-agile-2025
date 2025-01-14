@@ -16,19 +16,10 @@ from network_processing.network_analyzer import (
 )
 from utils import get_config_value
 
-# Load GeoDataFrames
-#drive_iso_gdf = gpd.read_file(get_config_value("drive_iso_gdf_path"))
-#pois_gdf = gpd.read_file(get_config_value("pois_gdf_path"))
 iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
-#hexagons_centroids_gdf = gpd.read_file(get_config_value("hexagon_centroid_gdf_path"))
 
-# Set CRS for all GeoDataFrames
-# drive_iso_gdf = drive_iso_gdf.to_crs(get_config_value("crs"))
-# pois_gdf = pois_gdf.to_crs(get_config_value("crs"))
 iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
-#hexagons_centroids_gdf = hexagons_centroids_gdf.to_crs(get_config_value("crs"))
 
-# Get configuration values
 mode = get_config_value("mode")
 start_time_string = get_config_value("date")
 minute_threshold = get_config_value("minute_threshold")
@@ -36,18 +27,11 @@ matching_column = get_config_value("matching_column")
 output_path = get_config_value("output_path")
 city_name = get_config_value("city_name")
 
-# Create a new column in the GeoDataFrame that combines the matching column and the value column
 iso_polygons_gdf["matching"] = iso_polygons_gdf[matching_column].astype(str) + "_" + (iso_polygons_gdf["value"] / 60).astype(str)
 
-
-
-
-
-# Set start and end times
 start_time_object = datetime.combine(datetime.today(), datetime.strptime(start_time_string, "%H:%M:%S").time())
 end_time_object = start_time_object + timedelta(minutes=minute_threshold)
 
-# Load graphs
 bus_graph = load_graph_from_file(f"{output_path}{city_name}_bus_graph.gml")
 walk_graph = load_graph_from_file(f"{output_path}{city_name}_walk_graph.gml")
 bus_graph = load_graph_from_file(f"{output_path}{city_name}_bus_graph.gml")
@@ -75,8 +59,6 @@ if __name__ == '__main__':
     with Pool(processes=cpu_count() - 1) as pool:  # Use all but one CPU core
         result_gdf_list = list(tqdm(pool.imap(process_start_node, start_nodes), total=len(start_nodes), desc="Calculating reachable nodes"))
 
-    # Combine all resulting GeoDataFrames into one
     final_gdf = gpd.GeoDataFrame(pd.concat(result_gdf_list, ignore_index=True))
 
-    # Save the final GeoDataFrame to a file
     final_gdf.to_file(f"{output_path}{city_name}_union_polygon.geojson", driver='GeoJSON')

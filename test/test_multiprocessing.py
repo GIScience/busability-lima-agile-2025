@@ -101,7 +101,6 @@ def test_compare_results(setup_data):
     # Get results from multiprocessing execution
     multiprocessing_result_gdf_list = test_multiprocessing_execution(setup_data)
 
-    # Combine all resulting GeoDataFrames into one for comparison
     single_thread_result_gdf = gpd.GeoDataFrame(pd.concat(single_thread_result_gdf_list, ignore_index=True))
     multiprocessing_result_gdf = gpd.GeoDataFrame(pd.concat(multiprocessing_result_gdf_list, ignore_index=True))
 
