@@ -1,3 +1,6 @@
+> **⚠️ Warning**: This repository is currently under construction. Some features may be incomplete or not functioning. Data is not yet included. Repository will be ready for the reproducibility review.
+
+
 
 This repository includes the code and instructions for the paper `Towards Green Cities: Analysis of the Impact of Bus-Priority Lanes and Accessibility Indicators on Emission Control for Highly Congested Metropolitan Areas During Peak Times` for the for the 28th AGILE conference, Geographic Information Science responding to Global Challenges.
 
