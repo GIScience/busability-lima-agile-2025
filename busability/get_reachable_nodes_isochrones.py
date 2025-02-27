@@ -12,16 +12,20 @@ from busability.network_preprocessing.network_creator import load_graph_from_fil
 from busability.network_processing.network_analyzer import get_multimodal_poi_directness
 from busability.utils import get_config_value
 
-iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
+config_path = "../config/config_get_reachable_nodes_isochrones.yml"
 
-iso_polygons_gdf = iso_polygons_gdf.to_crs(get_config_value("crs"))
+iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path", config_path))
 
-mode = get_config_value("mode")
-start_time_string = get_config_value("date")
-minute_threshold = get_config_value("minute_threshold")
-matching_column = get_config_value("matching_column")
-output_path = get_config_value("output_path")
-city_name = get_config_value("city_name")
+crs = get_config_value("crs", config_path)
+
+iso_polygons_gdf = iso_polygons_gdf.to_crs(crs=crs)
+
+mode = get_config_value("mode", config_path)
+start_time_string = get_config_value("date", config_path)
+minute_threshold = get_config_value("minute_threshold", config_path)
+matching_column = get_config_value("matching_column", config_path)
+output_path = get_config_value("output_path", config_path)
+city_name = get_config_value("city_name", config_path)
 
 iso_polygons_gdf["matching"] = (
     iso_polygons_gdf[matching_column].astype(str)
@@ -61,7 +65,7 @@ def process_start_node(start_node):
         iso_polygons_gdf,
         matching_column=matching_column,
         polygon_names=all_reachable_nodes,
-        crs=get_config_value("crs"),
+        crs=crs,
         start_node=start_node,
     )
     return union_gdf
