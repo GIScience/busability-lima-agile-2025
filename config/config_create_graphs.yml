@@ -1,0 +1,7 @@
+city_name: Lima
+iso_polygons_gdf_path: ../data/lima/isos_walk_lima.gpkg
+crs: 4326
+matching_column: stop_id
+output_path: ../results/
+date: "08:00:00"
+minute_threshold: 30

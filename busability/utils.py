@@ -26,9 +26,8 @@ def get_row_by_column(gdf, column_name, value, bus_isochrone: bool = False):
     return filtered_gdf.to_crs(epsg=4326)
 
 
-def load_config_from_file() -> dict:
+def load_config_from_file(path: str) -> dict:
     """Load configuration from file on disk."""
-    path = "../config.yml"
     if os.path.isfile(path):
         with open(path, "r") as f:
             return yaml.safe_load(f)
@@ -36,6 +35,6 @@ def load_config_from_file() -> dict:
         return {}
 
 
-def get_config_value(key: str) -> str | int | dict:
-    config = load_config_from_file()
+def get_config_value(key: str, path: str = "../config.yml") -> str | int | dict:
+    config = load_config_from_file(path)
     return config[key]

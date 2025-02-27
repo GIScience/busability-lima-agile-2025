@@ -128,7 +128,7 @@ def create_network_from_gtfs(city, start_time, end_time, base_path=None):
     """
 
     if base_path is None:
-        path = os.path.join("data", city.lower(), "gtfs")
+        path = os.path.join("../data", city.lower(), "gtfs")
     else:
         path = os.path.join(base_path, "data", city.lower(), "gtfs")
 
