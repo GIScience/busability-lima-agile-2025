@@ -3,6 +3,8 @@ import geopandas as gpd
 from tqdm import tqdm
 import logging
 from multiprocessing import Pool
+
+from busability.get_reachable_nodes_isochrones import matching_column
 from busability.network_preprocessing.network_creator import (
     get_drive_isochrone,
     get_poi_inside_isochrone,
@@ -18,12 +20,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger()
 
+config_path = "../config/config_get_poi_ratio.yml"
+matching_column = get_config_value("matching_column", config_path)
 
 def process_row(row):
     index = row.name
     try:
         start_node = hexagons_centroids_gdf.loc[
-            index, get_config_value("matching_column")
+            index, matching_column
         ]
 
         start_centroid = hexagons_centroids_gdf.loc[index, "geometry"]
@@ -35,13 +39,13 @@ def process_row(row):
         drive_iso_for_start_node = get_drive_isochrone(
             drive_iso_gdf,
             start_node,
-            matching_column=get_config_value("matching_column"),
+            matching_column=matching_column,
         )
 
         pois_count_drive = get_poi_inside_isochrone(pois_gdf, drive_iso_for_start_node)
 
         walk_iso_from_start_centroid = walk_isochrones_from_hex[
-            walk_isochrones_from_hex[get_config_value("matching_column")] == start_node
+            walk_isochrones_from_hex[matching_column] == start_node
         ]
 
         walk_isos_for_start_node = get_intersected_isochrones(
@@ -80,18 +84,18 @@ def process_row(row):
 
 try:
     logger.info("Loading input files...")
-    drive_iso_gdf = gpd.read_file(get_config_value("drive_iso_gdf_path"))
-    pois_gdf = gpd.read_file(get_config_value("pois_gdf_path"))
-    iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path"))
-    hexagon_gdf = gpd.read_file(get_config_value("hexagon_gdf_path"))
+    drive_iso_gdf = gpd.read_file(get_config_value("drive_iso_gdf_path", config_path))
+    pois_gdf = gpd.read_file(get_config_value("pois_gdf_path", config_path))
+    iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path", config_path))
+    hexagon_gdf = gpd.read_file(get_config_value("hexagon_gdf_path", config_path))
     hexagons_centroids_gdf = gpd.read_file(
-        get_config_value("hexagon_centroid_gdf_path")
+        get_config_value("hexagon_centroid_gdf_path", config_path)
     )
     calc_isochrones_gdf = gpd.read_file(
-        get_config_value("computed_iso_polygons_gdf_path")
+        get_config_value("computed_iso_polygons_gdf_path", config_path)
     )
     walk_isochrones_from_hex = gpd.read_file(
-        get_config_value("walk_isochrones_from_hex_gdf_path")
+        get_config_value("walk_isochrones_from_hex_gdf_path", config_path)
     )
 except Exception as e:
     logger.critical(f"Failed to read input files: {e}")
@@ -99,7 +103,7 @@ except Exception as e:
 
 try:
     logger.info("Converting CRS...")
-    crs = get_config_value("crs")
+    crs = get_config_value("crs", config_path)
     drive_iso_gdf = drive_iso_gdf.to_crs(crs)
     pois_gdf = pois_gdf.to_crs(crs)
     iso_polygons_gdf = iso_polygons_gdf.to_crs(crs)
@@ -136,8 +140,8 @@ except Exception as e:
     raise RuntimeError(f"Failed during processing: {e}")
 
 try:
-    output_path = get_config_value("output_path")
-    city_name = get_config_value("city_name")
+    output_path = get_config_value("output_path", config_path)
+    city_name = get_config_value("city_name", config_path)
     logger.info(
         f"Saving output to {output_path}{city_name}_poi_ratio_for_reachable_nodes.geojson"
     )
