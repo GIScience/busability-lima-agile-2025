@@ -10,7 +10,7 @@ from busability.network_preprocessing.network_creator import (
 )
 from busability.utils import get_config_value
 
-config_path = "../config/config_create_graphs.yml"
+config_path = "../config/lima/config_create_graphs.yml"
 
 matching_column = get_config_value("matching_column", config_path)
 

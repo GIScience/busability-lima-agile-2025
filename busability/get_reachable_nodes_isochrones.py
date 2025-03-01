@@ -12,7 +12,7 @@ from busability.network_preprocessing.network_creator import load_graph_from_fil
 from busability.network_processing.network_analyzer import get_multimodal_poi_directness
 from busability.utils import get_config_value
 
-config_path = "../config/config_get_reachable_nodes_isochrones.yml"
+config_path = "../config/lima/config_get_reachable_nodes_isochrones.yml"
 
 iso_polygons_gdf = gpd.read_file(get_config_value("iso_polygons_gdf_path", config_path))
 

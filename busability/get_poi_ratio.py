@@ -15,12 +15,13 @@ from busability.network_processing.network_analyzer import (
 )
 from busability.utils import get_config_value
 
+config_path = "../config/lima/config_get_poi_ratio.yml"
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger()
 
-config_path = "../config/config_get_poi_ratio.yml"
 matching_column = get_config_value("matching_column", config_path)
 
 def process_row(row):
