@@ -35,6 +35,6 @@ def load_config_from_file(path: str) -> dict:
         return {}
 
 
-def get_config_value(key: str, path: str = "../config.yml") -> str | int | dict:
+def get_config_value(key: str, path: str = "../config/config.yml") -> str | int | dict:
     config = load_config_from_file(path)
     return config[key]
