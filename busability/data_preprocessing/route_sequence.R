@@ -2,6 +2,8 @@
 library(tidyverse)  
 library(tools)    
 
+# change to desired study area
+city_name <- "lima"
 
 create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
   
@@ -46,7 +48,8 @@ create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
     select(route_id, stop_id, stop_sequence, stop_lon, stop_lat, stop_name)
   
   # Write the output to CSV
-  output_file <- file.path(output_dir, "routes_seq_clean.csv")
+  output_name <- paste(city_name, "_stops_seq.csv")
+  output_file <- file.path(output_dir, output_name)
   cat("Writing output to", output_file, "...\n")
   
   # Create output directory if it doesn't exist
@@ -63,8 +66,8 @@ create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
 
 # Example usage
 # Set these to your desired paths
-gtfs_directory <- "/home/dabanto/Downloads/london_gtfs/lima/gtfs_lima"  
-output_directory <- "/home/dabanto/Downloads/london_gtfs/lima/gtfs_lima"  
+gtfs_directory <- paste("../../data/", city_name, "/gtfs", sep="")
+output_directory <- "../../data"
 
 # Call the function to process the data
 if (file.exists(gtfs_directory)) {
