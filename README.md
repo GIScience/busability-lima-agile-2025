@@ -4,6 +4,14 @@
 
 This repository includes the code and instructions for the paper `Towards Green Cities: Analysis of the Impact of Bus-Priority Lanes and Accessibility Indicators on Emission Control for Highly Congested Metropolitan Areas During Peak Times` for the for the 28th AGILE conference, Geographic Information Science responding to Global Challenges.
 
+## Requirements
+
+- Python: ≥ 3.10
+- Poetry: ≥ 1.5
+- R: ≥ 4.0
+
+This project uses [Poetry](https://python-poetry.org/docs/) for packaging and dependencies management. Please make sure it is installed on your system.
+
 ## Installing Dependencies with Poetry
 
 To set up the project and install all dependencies specified in the `pyproject.toml` file, use the following command:
