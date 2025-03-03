@@ -1,0 +1,113 @@
+---
+title: "make_gtfs"
+author: "dabanto"
+date: "2025-01-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(sf)
+library(tidyverse)  # Modern data science workflow
+library(sf)
+library(sp)
+library(spdep)
+library(rgdal)
+library(tmap)
+library(tmaptools)
+library(grid)
+library(gridExtra)
+library(knitr)
+
+## Global options
+options(max.print="75")
+opts_knit$set(width=75)
+opts_knit$set(root.dir = '/home/dabanto/Downloads/kleine_fg/test_agile/')
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure}
+
+
+lines <- st_read("make_gtfs/final.gpkg")
+
+lines <- lines %>%
+  mutate(
+    route_type = str_extract(shape_id, "(?<=_).*"),
+    route_name = str_extract(shape_id, "^[^_]*")
+  ) %>% 
+  select(-c(layer, path))
+
+```
+
+
+```{r pressure}
+
+stops <- st_read("make_gtfs/atu_stops.gpkg")
+
+
+```
+
+
+```{r}
+freq <- lines %>% 
+  st_drop_geometry() %>% 
+  mutate(route_short_name = route_name) %>% 
+  mutate(route_long_name = shape_id) %>% 
+  mutate(route_type = 3) %>% 
+  mutate(service_window_id = "weekday_peak_1") %>% 
+  mutate(frequency = 6) %>% 
+  mutate(direction = 1) %>% 
+  select(-route_name)
+
+write.csv(freq, "make_gtfs/frequencies.csv", row.names = F)
+
+```
+
+
+```{r}
+routes <- lines %>% 
+  select(shape_id) %>% 
+  st_transform(crs = 4326)
+
+st_write(routes, "make_gtfs/shapes.geojson", driver = "GeoJSON", delete_dsn = TRUE)
+
+```
+
+
+```{r}
+
+meta <- tibble(
+  agency_name = "Test GTFS",   # Numeric column
+  agency_url = "https://wiki.openstreetmap.org/wiki/GTFS", # Character column
+  agency_timezone = "America/Lima",
+  start_date =  20240101,
+  end_date = 20250101
+)
+
+write.csv(meta, "make_gtfs/meta.csv", row.names = F)
+
+```
+
+```{r}
+stops_op <- stops %>% 
+  st_transform(crs = 4326) %>% 
+  select(NUEVO_CODIGO, EJE_VIAL) %>% 
+  mutate(stop_id = NUEVO_CODIGO) %>%
+  mutate(stop_name = paste(EJE_VIAL, NUEVO_CODIGO, sep = "_")) %>% 
+  mutate(stop_lat = st_coordinates(.)[, "Y"]) %>%
+  mutate(stop_lon = st_coordinates(.)[, "X"]) %>% 
+  mutate(parent_station = 0) %>% 
+  select(stop_id, stop_lon, stop_lat, parent_station, stop_name) %>% 
+  st_drop_geometry()
+
+write.csv(stops_op, "make_gtfs/stops.csv", row.names = F)
+
+
+```
+
+
+
