@@ -1,33 +1,33 @@
-
 library(tidyverse)  
 library(tools)    
 
+# Define paths 
+city_name <- "lima"  # Change to desired study area
+base_data_dir <- "../../data"  #folder, where the gtfs folder is stored
+gtfs_directory <- file.path(base_data_dir, city_name, "<gtfs-folder-name>")  # name of the GTFS folder
+output_directory <- base_data_dir  # Output directory path, can be the same as the folder, where the GTFS folder is
 
-create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
+create_route_sequences <- function(gtfs_dir, output_dir) {
   
-
+  # Define file paths
   routes_file <- file.path(gtfs_dir, "routes.txt")
   trips_file <- file.path(gtfs_dir, "trips.txt")
   stop_times_file <- file.path(gtfs_dir, "stop_times.txt")
   stops_file <- file.path(gtfs_dir, "stops.txt")
   
-
   required_files <- c(routes_file, trips_file, stop_times_file, stops_file)
   missing_files <- required_files[!file.exists(required_files)]
   
   if (length(missing_files) > 0) {
     stop("Missing required GTFS files: ", paste(basename(missing_files), collapse = ", "))
   }
-
   cat("Reading GTFS files...\n")
   routes <- read.csv(routes_file, stringsAsFactors = FALSE)
   trips <- read.csv(trips_file, stringsAsFactors = FALSE)
   stop_times <- read.csv(stop_times_file, stringsAsFactors = FALSE)
   stops <- read.csv(stops_file, stringsAsFactors = FALSE)
-
   cat("Processing route stop sequences...\n")
   
-
   trips_with_stop_count <- trips %>%
     left_join(stop_times %>% 
                 group_by(trip_id) %>% 
@@ -46,7 +46,8 @@ create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
     select(route_id, stop_id, stop_sequence, stop_lon, stop_lat, stop_name)
   
   # Write the output to CSV
-  output_file <- file.path(output_dir, "routes_seq_clean.csv")
+  output_name <- paste(city_name, "_stops_seq.csv")
+  output_file <- file.path(output_dir, output_name)
   cat("Writing output to", output_file, "...\n")
   
   # Create output directory if it doesn't exist
@@ -62,23 +63,10 @@ create_route_sequences <- function(gtfs_dir, output_dir = getwd()) {
 }
 
 # Example usage
-# Set these to your desired paths
-gtfs_directory <- "/home/dabanto/Downloads/london_gtfs/lima/gtfs_lima"  
-output_directory <- "/home/dabanto/Downloads/london_gtfs/lima/gtfs_lima"  
-
 # Call the function to process the data
 if (file.exists(gtfs_directory)) {
   result <- create_route_sequences(gtfs_directory, output_directory)
 } else {
   cat("Please set 'gtfs_directory' to the folder containing your GTFS files\n")
 }
-
-
-
-
-
-
-
-
-
 
