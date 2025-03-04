@@ -26,6 +26,11 @@ Activate the environment:
 poetry shell
 ```
 
+## Docker installation
+
+Please follow the instructions provided here by the official OpenRouteService(ORS) [website](https://giscience.github.io/openrouteservice/run-instance/running-with-docker). We are going to run docker with docker compose (section "Running prebuilt images").
+
+
 ## Get the Data
 Download the data for running this workflow for Lima and London [here](https://heibox.uni-heidelberg.de/d/45aede558e8f4282ba10/) and copy the directory as `data` into the repository.
 
