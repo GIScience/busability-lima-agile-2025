@@ -38,6 +38,12 @@ Depending on which city you want to start with, you need to download the pbf fil
 Copy the downloaded file into the docker directory and modify the name in line 51 of our docker file. The docker compose file will create the car and walking profiles. This may take some time, but it will be easier to create the isochrones for one country. 
 The docker server will be exposed on port 8081. 
 
+Once all is set, run 
+```bash
+docker compose up -d
+```
+again. 
+
 
 ## Get the Data
 Download the data for running this workflow for Lima and London [here](https://heibox.uni-heidelberg.de/d/45aede558e8f4282ba10/) and copy the directory as `data` into the repository.
