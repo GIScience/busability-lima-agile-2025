@@ -1,11 +1,10 @@
 library(tidyverse)  
 library(tools)    
 
-# Define paths 
-city_name <- "lima"  # Change to desired study area
-base_data_dir <- "../../data"  #folder, where the gtfs folder is stored
-gtfs_directory <- file.path(base_data_dir, city_name, "<gtfs-folder-name>")  # name of the GTFS folder
-output_directory <- base_data_dir  # Output directory path, can be the same as the folder, where the GTFS folder is
+
+# change to desired study area
+city_name <- "lima"
+>>>>>>> 77e9b7a34aea4e250fcb35fa9db506297acd9e18
 
 create_route_sequences <- function(gtfs_dir, output_dir) {
   
@@ -63,6 +62,8 @@ create_route_sequences <- function(gtfs_dir, output_dir) {
 }
 
 # Example usage
+
+>>>>>>> 77e9b7a34aea4e250fcb35fa9db506297acd9e18
 # Call the function to process the data
 if (file.exists(gtfs_directory)) {
   result <- create_route_sequences(gtfs_directory, output_directory)
