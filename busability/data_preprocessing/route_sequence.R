@@ -1,10 +1,20 @@
-library(tidyverse)  
-library(tools)    
+# Check if required packages are installed
+required_packages <- c("tidyverse", "tools")
+new_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
 
+# Install missing packages
+if (length(new_packages) > 0) {
+  install.packages(new_packages, dependencies = TRUE)
+}
 
-# change to desired study area
-city_name <- "lima"
->>>>>>> 77e9b7a34aea4e250fcb35fa9db506297acd9e18
+# Load the libraries
+lapply(required_packages, library, character.only = TRUE)
+
+# Define paths 
+city_name <- "lima"  # Change to desired study area
+base_data_dir <- "../../data"  #folder, where the gtfs folder is stored
+gtfs_directory <- file.path(base_data_dir, city_name, "<gtfs-folder-name>")  # name of the GTFS folder
+output_directory <- base_data_dir  # Output directory path, can be the same as the folder, where the GTFS folder is
 
 create_route_sequences <- function(gtfs_dir, output_dir) {
   
@@ -62,8 +72,6 @@ create_route_sequences <- function(gtfs_dir, output_dir) {
 }
 
 # Example usage
-
->>>>>>> 77e9b7a34aea4e250fcb35fa9db506297acd9e18
 # Call the function to process the data
 if (file.exists(gtfs_directory)) {
   result <- create_route_sequences(gtfs_directory, output_directory)
