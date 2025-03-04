@@ -30,6 +30,14 @@ poetry shell
 
 Please follow the instructions provided here by the official OpenRouteService(ORS) [website](https://giscience.github.io/openrouteservice/run-instance/running-with-docker). We are going to run docker with docker compose (section "Running prebuilt images").
 
+Once you have successfully installed docker and runned docker compose, we will modify the docker compose file to begin with our analysis. 
+
+Look for your docker-compose.yml file and open it. Now you will paste our [modified](busability/data_preprocessing/get_route_geometry_between_stops.ipynb) docker compose file. 
+
+Depending on which city you want to start with, you need to download the pbf file for [London](https://download.geofabrik.de/europe/united-kingdom/england/greater-london-latest.osm.pbf) or [Lima](https://download.geofabrik.de/south-america/peru-latest.osm.pbf). 
+Copy the downloaded file into the docker directory and modify the name in line 51 of our docker file. The docker compose file will create the car and walking profiles. This may take some time, but it will be easier to create the isochrones for one country. 
+The docker server will be exposed on port 8081. 
+
 
 ## Get the Data
 Download the data for running this workflow for Lima and London [here](https://heibox.uni-heidelberg.de/d/45aede558e8f4282ba10/) and copy the directory as `data` into the repository.
