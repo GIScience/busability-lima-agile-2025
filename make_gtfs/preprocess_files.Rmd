@@ -21,7 +21,7 @@ library(knitr)
 ## Global options
 options(max.print="75")
 opts_knit$set(width=75)
-opts_knit$set(root.dir = '/home/dabanto/Downloads/kleine_fg/test_agile/')
+opts_knit$set(root.dir = '/usr/busability-lima-agile-2025/make_gtfs') #set directory to make_gtfs
 ```
 
 
@@ -32,7 +32,7 @@ You can also embed plots, for example:
 ```{r pressure}
 
 
-lines <- st_read("make_gtfs/final.gpkg")
+lines <- st_read("make_gtfs_data/final.gpkg")
 
 lines <- lines %>%
   mutate(
@@ -46,7 +46,7 @@ lines <- lines %>%
 
 ```{r pressure}
 
-stops <- st_read("make_gtfs/atu_stops.gpkg")
+stops <- st_read("make_gtfs_data/atu_stops.gpkg")
 
 
 ```
@@ -63,7 +63,7 @@ freq <- lines %>%
   mutate(direction = 1) %>% 
   select(-route_name)
 
-write.csv(freq, "make_gtfs/frequencies.csv", row.names = F)
+write.csv(freq, "make_gtfs_data/frequencies.csv", row.names = F)
 
 ```
 
@@ -73,7 +73,7 @@ routes <- lines %>%
   select(shape_id) %>% 
   st_transform(crs = 4326)
 
-st_write(routes, "make_gtfs/shapes.geojson", driver = "GeoJSON", delete_dsn = TRUE)
+st_write(routes, "make_gtfs_data/shapes.geojson", driver = "GeoJSON", delete_dsn = TRUE)
 
 ```
 
@@ -88,7 +88,7 @@ meta <- tibble(
   end_date = 20250101
 )
 
-write.csv(meta, "make_gtfs/meta.csv", row.names = F)
+write.csv(meta, "make_gtfs_data/meta.csv", row.names = F)
 
 ```
 
@@ -104,7 +104,7 @@ stops_op <- stops %>%
   select(stop_id, stop_lon, stop_lat, parent_station, stop_name) %>% 
   st_drop_geometry()
 
-write.csv(stops_op, "make_gtfs/stops.csv", row.names = F)
+write.csv(stops_op, "make_gtfs_data/stops.csv", row.names = F)
 
 
 ```
