@@ -46,11 +46,11 @@ again.
 
 ## Create GTFS File
 
-First, we need to run the R Markdown [preprocess_files.Rmd](busability-lima-agile-2025/blob/main/make_gtfs/R/preprocess_files.Rmd). Paste the files "atu_stops.gpkg" and "final_shapes.gpkg" into the make_gtfs_data folder.  
+First, we need to run the R Markdown [preprocess_files.Rmd](busability-lima-agile-2025/blob/main/make_gtfs/preprocess_files.Rmd). Paste the files "atu_stops.gpkg" and "final_shapes.gpkg" into the make_gtfs_data folder.  
 This will create all the required files that we need for the next script.
 
-To create the GTFS File for Lima, we are using the Python package make_gtfs. Since the latest version of the package has some issues, we need to download [this](https://github.com/mrcagney/make_gtfs/releases/tag/4.0.7) version. Download the source code, extract the zip and copy the folder to the make_gtfs folder. 
-Once you have copied the folder, you can run the gtfs notebook. 
+To create the GTFS File for Lima, we are using the Python package make_gtfs. Since the latest version of the package has some issues, we need to download [this](https://github.com/mrcagney/make_gtfs/releases/tag/4.0.7) version. Download the source code, extract the zip and copy the folder intoto the make_gtfs folder. 
+Once you have copied the folder, you can run the gtfs notebook that is within make_gtfs_data. 
 
 ## Get the Data
 Download the data for running this workflow for Lima and London [here](https://heibox.uni-heidelberg.de/d/45aede558e8f4282ba10/) and copy the directory as `data` into the repository.
